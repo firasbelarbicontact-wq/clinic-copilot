@@ -1,0 +1,13 @@
+package com.clinic.reviews_feedback_service;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ReviewsFeedbackServiceApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(ReviewsFeedbackServiceApplication.class, args);
+	}
+
+}

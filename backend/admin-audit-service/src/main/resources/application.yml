@@ -1,0 +1,20 @@
+server:
+  port: 8089
+
+spring:
+  application:
+    name: admin-audit-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/clinic_admin}
+    username: ${DB_USER:clinic}
+    password: ${DB_PASSWORD:secret}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
