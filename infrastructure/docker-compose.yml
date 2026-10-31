@@ -1,11 +1,23 @@
+
 name: clinic-copilot
 
-x-db: &db
-  DB_USER: ${POSTGRES_USER}
-  DB_PASSWORD: ${POSTGRES_PASSWORD}
-  JAVA_TOOL_OPTIONS: -Xmx256m
+# Shared configuration for Spring Boot services only
+x-spring-common: &spring-common
+  restart: unless-stopped
+  environment:
+    DB_USER: ${POSTGRES_USER}
+    DB_PASSWORD: ${POSTGRES_PASSWORD}
+    JAVA_TOOL_OPTIONS: -Xmx256m
+  depends_on:
+    postgres:
+      condition: service_healthy
 
 services:
+
+  # -------------------------
+  # DATABASES
+  # -------------------------
+
   postgres:
     image: postgres:16
     restart: unless-stopped
@@ -19,10 +31,25 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d clinic_identity"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d clinic_identity"]
       interval: 5s
       timeout: 5s
       retries: 10
+
+  chat-mongodb:
+    image: mongo:8
+    restart: unless-stopped
+    volumes:
+      - chat_mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # -------------------------
+  # MESSAGE BROKER
+  # -------------------------
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -34,6 +61,10 @@ services:
       - "5672:5672"
       - "15672:15672"
 
+  # -------------------------
+  # API GATEWAY
+  # -------------------------
+
   api-gateway:
     build: ../backend/api-gateway
     image: ${DOCKERHUB_USER:-clinic}/clinic-api-gateway:1.0
@@ -43,6 +74,10 @@ services:
     ports:
       - "8080:8080"
 
+  # -------------------------
+  # ANGULAR FRONTEND
+  # -------------------------
+
   frontend:
     build: ../frontend/web-angular
     image: ${DOCKERHUB_USER:-clinic}/clinic-frontend:1.0
@@ -51,95 +86,107 @@ services:
       - "4200:80"
     depends_on:
       - api-gateway
+
+  # -------------------------
+  # SPRING BOOT SERVICES
+  # -------------------------
+
   identity-profile-service:
+    <<: *spring-common
     build: ../backend/identity-profile-service
     image: ${DOCKERHUB_USER:-clinic}/clinic-identity-profile-service:1.0
-    restart: unless-stopped
     environment:
-      <<: *db
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_URL: jdbc:postgresql://postgres:5432/clinic_identity
-    depends_on:
-      postgres:
-        condition: service_healthy
+      JAVA_TOOL_OPTIONS: -Xmx256m
+
   doctor-directory-service:
+    <<: *spring-common
     build: ../backend/doctor-directory-service
     image: ${DOCKERHUB_USER:-clinic}/clinic-doctor-directory-service:1.0
-    restart: unless-stopped
     environment:
-      <<: *db
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_URL: jdbc:postgresql://postgres:5432/clinic_doctors
-    depends_on:
-      postgres:
-        condition: service_healthy
+      JAVA_TOOL_OPTIONS: -Xmx256m
+
   appointment-service:
+    <<: *spring-common
     build: ../backend/appointment-service
     image: ${DOCKERHUB_USER:-clinic}/clinic-appointment-service:1.0
-    restart: unless-stopped
     environment:
-      <<: *db
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_URL: jdbc:postgresql://postgres:5432/clinic_appointments
-    depends_on:
-      postgres:
-        condition: service_healthy
+      JAVA_TOOL_OPTIONS: -Xmx256m
+
   ai-assessment-service:
+    <<: *spring-common
     build: ../backend/ai-assessment-service
     image: ${DOCKERHUB_USER:-clinic}/clinic-ai-assessment-service:1.0
-    restart: unless-stopped
     environment:
-      <<: *db
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_URL: jdbc:postgresql://postgres:5432/clinic_ai
-    depends_on:
-      postgres:
-        condition: service_healthy
+      JAVA_TOOL_OPTIONS: -Xmx256m
+
+  medical-records-service:
+    <<: *spring-common
+    build: ../backend/medical-records-service
+    image: ${DOCKERHUB_USER:-clinic}/clinic-medical-records-service:1.0
+    environment:
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_URL: jdbc:postgresql://postgres:5432/clinic_records
+      JAVA_TOOL_OPTIONS: -Xmx256m
+
+  notification-service:
+    <<: *spring-common
+    build: ../backend/notification-service
+    image: ${DOCKERHUB_USER:-clinic}/clinic-notification-service:1.0
+    environment:
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_URL: jdbc:postgresql://postgres:5432/clinic_notifications
+      JAVA_TOOL_OPTIONS: -Xmx256m
+
+  reviews-feedback-service:
+    <<: *spring-common
+    build: ../backend/reviews-feedback-service
+    image: ${DOCKERHUB_USER:-clinic}/clinic-reviews-feedback-service:1.0
+    environment:
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_URL: jdbc:postgresql://postgres:5432/clinic_reviews
+      JAVA_TOOL_OPTIONS: -Xmx256m
+
+  admin-audit-service:
+    <<: *spring-common
+    build: ../backend/admin-audit-service
+    image: ${DOCKERHUB_USER:-clinic}/clinic-admin-audit-service:1.0
+    environment:
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_URL: jdbc:postgresql://postgres:5432/clinic_admin
+      JAVA_TOOL_OPTIONS: -Xmx256m
+
+  # -------------------------
+  # EXPRESS CHAT SERVICE
+  # -------------------------
+
   chat-service:
     build: ../backend/chat-service
     image: ${DOCKERHUB_USER:-clinic}/clinic-chat-service:1.0
     restart: unless-stopped
     environment:
-      <<: *db
-      DB_URL: jdbc:postgresql://postgres:5432/clinic_chat
+      NODE_ENV: production
+      PORT: 3000
+      MONGODB_URI: mongodb://chat-mongodb:27017/clinic_chat
     depends_on:
-      postgres:
+      chat-mongodb:
         condition: service_healthy
-  medical-records-service:
-    build: ../backend/medical-records-service
-    image: ${DOCKERHUB_USER:-clinic}/clinic-medical-records-service:1.0
-    restart: unless-stopped
-    environment:
-      <<: *db
-      DB_URL: jdbc:postgresql://postgres:5432/clinic_records
-    depends_on:
-      postgres:
-        condition: service_healthy
-  notification-service:
-    build: ../backend/notification-service
-    image: ${DOCKERHUB_USER:-clinic}/clinic-notification-service:1.0
-    restart: unless-stopped
-    environment:
-      <<: *db
-      DB_URL: jdbc:postgresql://postgres:5432/clinic_notifications
-    depends_on:
-      postgres:
-        condition: service_healthy
-  reviews-feedback-service:
-    build: ../backend/reviews-feedback-service
-    image: ${DOCKERHUB_USER:-clinic}/clinic-reviews-feedback-service:1.0
-    restart: unless-stopped
-    environment:
-      <<: *db
-      DB_URL: jdbc:postgresql://postgres:5432/clinic_reviews
-    depends_on:
-      postgres:
-        condition: service_healthy
-  admin-audit-service:
-    build: ../backend/admin-audit-service
-    image: ${DOCKERHUB_USER:-clinic}/clinic-admin-audit-service:1.0
-    restart: unless-stopped
-    environment:
-      <<: *db
-      DB_URL: jdbc:postgresql://postgres:5432/clinic_admin
-    depends_on:
-      postgres:
-        condition: service_healthy
+
 volumes:
   pgdata:
+  chat_mongo_data:
