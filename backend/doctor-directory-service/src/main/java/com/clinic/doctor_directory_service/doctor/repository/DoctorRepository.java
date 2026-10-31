@@ -10,8 +10,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.clinic.doctor_directory_service.doctor.entity.Doctor;
 import com.clinic.doctor_directory_service.doctor.entity.ProfessionalStatus;
 import com.clinic.doctor_directory_service.doctor.entity.VerificationStatus;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
+public interface DoctorRepository extends JpaRepository<Doctor, UUID>, JpaSpecificationExecutor<Doctor> {
 
     Optional<Doctor> findByUserId(String userId);
 
