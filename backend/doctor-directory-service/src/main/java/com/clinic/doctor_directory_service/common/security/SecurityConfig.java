@@ -40,8 +40,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/doctors/**").hasRole("DOCTOR")
                 .anyRequest().authenticated())
-            .oauth2ResourceServer(oauth -> oauth
-                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
+                        .oauth2ResourceServer(oauth -> oauth
+                        .authenticationEntryPoint(new ApiAuthenticationEntryPoint())
+                        .accessDeniedHandler(new ApiAccessDeniedHandler())
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
         return http.build();
     }
 
