@@ -5,16 +5,34 @@ spring:
   application:
     name: doctor-directory-service
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/clinic_doctors}
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/clinic_doctors}
     username: ${DB_USER:clinic}
     password: ${DB_PASSWORD:secret}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     open-in-view: false
+  flyway:
+    enabled: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
 
 management:
   endpoints:
     web:
       exposure:
         include: health
+  endpoint:
+    health:
+      show-details: never
+
+app:
+  security:
+    jwt:
+      # Clé HS256 partagée avec Identity (M1). À remplacer quand M1 a choisi son mode de signature.
+      secret: ${JWT_SECRET:dev-only-secret-change-me-0123456789}
+      roles-claim: ${JWT_ROLES_CLAIM:role}
+  storage:
+    diplomas-dir: ${DIPLOMAS_DIR:./data/diplomas}
