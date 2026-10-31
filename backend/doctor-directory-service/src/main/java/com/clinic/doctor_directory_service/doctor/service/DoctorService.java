@@ -87,10 +87,14 @@ public class DoctorService {
             throw new ConflictException("Ce numéro d'ordre est déjà utilisé.");
         }
 
-        apply(doctor, request);
-        if (licenseChanged) {
+         apply(doctor, request);
+        VerificationStatus previous = doctor.getVerificationStatus();
+        if (licenseChanged && previous != VerificationStatus.PENDING) {
             // Un changement du numéro d'ordre doit être revérifié par un administrateur.
             doctor.setVerificationStatus(VerificationStatus.PENDING);
+            historyRepository.save(new DoctorStatusHistory(doctor.getId(), StatusType.VERIFICATION,
+                    previous.name(), VerificationStatus.PENDING.name(), CurrentUser.id(),
+                    "Numéro d'ordre modifié"));
         }
         return DoctorMapper.toResponse(doctor);
     }
