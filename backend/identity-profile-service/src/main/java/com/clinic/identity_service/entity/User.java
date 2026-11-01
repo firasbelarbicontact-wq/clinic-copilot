@@ -5,8 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.UUID;
 
 @NoArgsConstructor 
@@ -20,10 +21,10 @@ public class User {
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID userId;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String firstName;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String lastName;
 
     @Column(nullable = false, unique = true)
@@ -33,7 +34,7 @@ public class User {
     private String password;
 
     @Column(nullable = false)
-    private Date dateOfBirth;
+    private LocalDate dateOfBirth;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

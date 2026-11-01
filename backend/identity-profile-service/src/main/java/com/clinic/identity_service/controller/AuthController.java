@@ -3,11 +3,15 @@ package com.clinic.identity_service.controller;
 import com.clinic.identity_service.dto.AuthResponse;
 import com.clinic.identity_service.dto.LoginRequest;
 import com.clinic.identity_service.dto.RegisterRequest;
+import com.clinic.identity_service.dto.UserResponse;
 import com.clinic.identity_service.entity.User;
 import com.clinic.identity_service.security.CustomUserDetailsService;
 import com.clinic.identity_service.security.JwtService;
-import com.clinic.identity_service.service.UserService;
+import com.clinic.identity_service.service.AuthService;
 
+import jakarta.validation.Valid;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -16,24 +20,20 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final UserService userService;
+    private final AuthService authService;
     private final JwtService jwtService;
     private final CustomUserDetailsService customUserDetailsService;
 
-    public AuthController(UserService userService, JwtService jwtService, CustomUserDetailsService customUserDetailsService) {
-        this.userService = userService;
+    public AuthController(AuthService authService, JwtService jwtService, CustomUserDetailsService customUserDetailsService) {
+        this.authService = authService;
         this.jwtService = jwtService;
         this.customUserDetailsService = customUserDetailsService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
 
-        User user = userService.loginUser(request);
-
-        if (user == null) {
-            return ResponseEntity.status(401).build();
-        }
+        User user = authService.loginUser(request);
 
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getEmail());
 
@@ -49,12 +49,21 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
-        try {
-            User user = userService.registerUser(request);
-            return ResponseEntity.ok(user);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
+        
+        User user = authService.registerUser(request);
+
+        UserResponse response = new UserResponse(
+            user.getUserId(),
+            user.getFirstName(),
+            user.getLastName(),
+            user.getEmail(),
+            user.getDateOfBirth(),
+            user.getCreatedAt(),
+            user.getRole(),  
+            user.getIsActive()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

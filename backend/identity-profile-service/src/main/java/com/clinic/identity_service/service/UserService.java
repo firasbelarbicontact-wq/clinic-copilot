@@ -1,87 +1,68 @@
 package com.clinic.identity_service.service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.clinic.identity_service.dto.LoginRequest;
-import com.clinic.identity_service.dto.RegisterRequest;
-import com.clinic.identity_service.entity.Role;
+import com.clinic.identity_service.dto.UserResponse;
 import com.clinic.identity_service.entity.User;
-import com.clinic.identity_service.exception.ExistedByMailException;
+import com.clinic.identity_service.exception.UserNotFoundException;
 import com.clinic.identity_service.repository.UserRepository;
 
+
+@Service
 public class UserService {
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    } 
+    }
 
-    public User registerUser(RegisterRequest request) throws ExistedByMailException {
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(this::mapToUserResponse)
+                .toList();
+    }
 
-        if (userRepository.findByEmail(request.email())) {
-            throw new ExistedByMailException(
-                "User with this email already exists."
-            );
-        }
+    @Transactional 
+    public void deactivateUser(UUID userId) {
+        User user = getUserById(userId);
+        user.setIsActive(false);
+    }
 
-        User user = new User();
-
-        user.setFirstName(request.firstName());
-        user.setLastName(request.lastName());
-        user.setEmail(request.email());
-
-        user.setRole(Role.PATIENT);
+    @Transactional 
+    public void activateUser(UUID userId) {
+        User user = getUserById(userId);
         user.setIsActive(true);
-        user.setPassword(passwordEncoder.encode(request.password()));
-
-        return userRepository.save(user);
     }
 
-    public User loginUser(LoginRequest request) {
-        Optional<User> user = userRepository.findUserByEmail(request.email());
-        if (user.isPresent() && passwordEncoder.matches(request.password(), user.get().getPassword())) {
-            return user.get();
-        }
-        return null;
+    @Transactional 
+    public void deleteUser(UUID userId)  {
+        User user = getUserById(userId);
+        userRepository.delete(user);
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAllUsers();
+    private User getUserById(UUID userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(
+                    "User not found with ID: " + userId
+                ));
     }
 
-    public Boolean DeactivateUser(String email) {
-        Optional<User> user = userRepository.findUserByEmail(email);
-        if (user.isPresent()) {
-            User existingUser = user.get();
-            existingUser.setIsActive(false);
-            userRepository.save(existingUser);
-            return true;
-        }
-        return false;
-    }
-
-    public Boolean ActivateUser(String email) {
-        Optional<User> user = userRepository.findUserByEmail(email);
-        if (user.isPresent()) {
-            User existingUser = user.get();
-            existingUser.setIsActive(true);
-            userRepository.save(existingUser);
-            return true;
-        }
-        return false;
-    }
-
-    public Boolean DeleteUser(String email) {
-        Optional<User> user = userRepository.findUserByEmail(email);
-        if (user.isPresent()) {
-            userRepository.delete(user.get());
-            return true;
-        }
-        return false;
+    private UserResponse mapToUserResponse(User user) {
+        return new UserResponse(
+                user.getUserId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getDateOfBirth(),
+                user.getCreatedAt(),
+                user.getRole(),
+                user.getIsActive()
+        );
     }
 }

@@ -101,6 +101,17 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/clinic_identity
       JAVA_TOOL_OPTIONS: -Xmx256m
 
+  patient-profile-service:
+    <<: *spring-common
+    build: ../backend/patient-profile-service
+    image: ${DOCKERHUB_USER:-clinic}/clinic-patient-profile-service:1.0
+    environment:
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_URL: jdbc:postgresql://postgres:5432/clinic_patients
+      SERVER_PORT: 8090
+      JAVA_TOOL_OPTIONS: -Xmx256m
+
   doctor-directory-service:
     <<: *spring-common
     build: ../backend/doctor-directory-service

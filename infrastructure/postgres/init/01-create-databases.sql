@@ -1,3 +1,4 @@
+CREATE DATABASE clinic_patients;
 CREATE DATABASE clinic_doctors;
 CREATE DATABASE clinic_appointments;
 CREATE DATABASE clinic_ai;

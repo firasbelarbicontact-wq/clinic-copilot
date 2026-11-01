@@ -10,7 +10,7 @@ Plateforme d'aide à l'orientation médicale : décrire ses symptômes, recevoir
 |---|---|
 | Web | Angular + TypeScript |
 | Mobile | Kotlin + Jetpack Compose (Android) |
-| Backend | Java 21 + Spring Boot (10 microservices) |
+| Backend | Java 21 + Spring Boot (11 microservices) |
 | Gateway | Spring Cloud Gateway |
 | Base de données | PostgreSQL 16 (une base par service) |
 | Messagerie | RabbitMQ |
@@ -20,9 +20,10 @@ Plateforme d'aide à l'orientation médicale : décrire ses symptômes, recevoir
 
 ```
 clinic-copilot/
-├── backend/                 10 microservices Spring Boot (1 Dockerfile chacun)
+├── backend/                 11 microservices Spring Boot (1 Dockerfile chacun)
 │   ├── api-gateway/
 │   ├── identity-profile-service/
+│   ├── patient-profile-service/
 │   ├── doctor-directory-service/
 │   ├── appointment-service/
 │   ├── ai-assessment-service/
@@ -120,6 +121,7 @@ Ports internes des microservices (accessibles seulement entre conteneurs) :
 |---|---|---|
 | api-gateway | 8080 | aucune |
 | identity-profile-service | 8081 | clinic_identity |
+| patient-profile-service | 8090 | clinic_patients |
 | doctor-directory-service | 8082 | clinic_doctors |
 | appointment-service | 8083 | clinic_appointments |
 | ai-assessment-service | 8084 | clinic_ai |
