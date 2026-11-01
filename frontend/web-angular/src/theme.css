@@ -98,3 +98,12 @@
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
 }
+@layer components {
+  .btn { @apply inline-flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50; }
+  .btn-lg { @apply h-10 px-8; }
+  .btn-icon { @apply w-9 px-0; }
+  .btn-hero { @apply rounded-full bg-gradient-primary text-primary-foreground shadow-soft hover:-translate-y-0.5 hover:opacity-95; }
+  .btn-soft { @apply rounded-full border border-primary/25 bg-card text-primary hover:bg-soft; }
+  .btn-light { @apply rounded-full bg-card text-deep hover:bg-soft; }
+  .btn-ghost { @apply hover:bg-soft hover:text-primary; }
+}
