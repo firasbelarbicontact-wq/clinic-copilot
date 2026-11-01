@@ -1,0 +1,130 @@
+<div class="min-h-screen">
+  <app-header />
+  <main>
+    <!-- Hero -->
+    <section class="relative overflow-hidden bg-gradient-soft">
+      <div class="pointer-events-none absolute -right-32 -top-32 h-[520px] w-[520px] rounded-full bg-tertiary/15 blur-3xl"></div>
+      <div class="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
+        <div appReveal>
+          <span class="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-sm font-medium text-primary">
+            <app-icon [icon]="Bot" [size]="16" />Orientation médicale assistée par l'IA
+          </span>
+          <h1 class="mt-6 text-4xl font-extrabold leading-tight tracking-tight text-deep sm:text-5xl lg:text-6xl">
+            De vos symptômes, <span class="text-gradient">vers les bons soins.</span>
+          </h1>
+          <p class="mt-6 max-w-xl text-lg text-muted-foreground">Une plateforme intelligente d'orientation et de gestion des rendez-vous médicaux, assistée par l'IA.</p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a routerLink="/inscription" class="btn btn-hero btn-lg">Commencer <app-icon [icon]="ArrowRight" [size]="16" /></a>
+            <a routerLink="/" fragment="fonctionnalites" class="btn btn-soft btn-lg">En savoir plus</a>
+          </div>
+        </div>
+        <div [appReveal]="150" class="relative mx-auto w-full max-w-md">
+          <div class="absolute -inset-6 rotate-6 rounded-[3rem] bg-gradient-primary opacity-20"></div>
+          <div class="absolute -bottom-8 -left-8 h-40 w-40 rounded-full bg-tertiary/25"></div>
+          <img src="images/soignante.jpg" alt="Soignante souriante en tenue médicale avec un stéthoscope" width="896" height="1120" class="relative aspect-[4/5] w-full rounded-[2.5rem] object-cover shadow-soft" />
+          <div class="absolute -left-4 top-10 max-w-[230px] rounded-2xl rounded-tl-sm bg-card p-4 shadow-soft sm:-left-12">
+            <p class="text-sm font-medium text-deep">Bonjour ! Comment puis-je vous aider aujourd'hui ?</p>
+          </div>
+          <div class="absolute -right-2 bottom-10 flex items-center gap-2 rounded-full bg-deep px-4 py-2 text-sm font-semibold text-deep-foreground shadow-soft sm:-right-6">
+            <span class="text-tertiary"><app-icon [icon]="Bot" [size]="16" /></span> IA Assistant
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Aperçu -->
+    <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+      <app-section-title eyebrow="Aperçu" title="Votre tableau de bord santé" text="Tout ce dont vous avez besoin, sur ordinateur comme sur mobile." />
+      <div appReveal class="relative mx-auto flex max-w-5xl flex-col items-center gap-10 lg:block">
+        <app-laptop-mockup class="lg:w-[82%]"><app-dashboard-preview /></app-laptop-mockup>
+        <app-phone-mockup class="lg:absolute lg:-bottom-6 lg:right-0"><app-phone-patient-home /></app-phone-mockup>
+      </div>
+    </section>
+
+    <!-- Fonctionnalités -->
+    <section id="fonctionnalites" class="scroll-mt-20 bg-soft/60 py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6">
+        <app-section-title eyebrow="Fonctionnalités" title="Une seule plateforme, tout votre parcours santé" />
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+          @for (f of features; track f.title; let i = $index) {
+            <div [appReveal]="i * 70"><app-feature-card [item]="f" /></div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Étapes -->
+    <section id="comment-ca-marche" class="mx-auto max-w-7xl scroll-mt-20 px-4 py-20 sm:px-6">
+      <app-section-title eyebrow="Comment ça marche" title="Six étapes, en toute simplicité" />
+      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        @for (s of steps; track s.title; let i = $index) {
+          <div [appReveal]="i * 70"><app-step-card [n]="i + 1" [item]="s" /></div>
+        }
+      </div>
+    </section>
+
+    <!-- Urgence -->
+    <section class="bg-gradient-soft py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6">
+        <app-section-title eyebrow="Orientation" title="Quatre niveaux d'orientation" text="Chaque situation reçoit une réponse adaptée et prudente." />
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          @for (u of urgencyLevels; track u.level; let i = $index) {
+            <div [appReveal]="i * 70"><app-urgency-card [item]="u" /></div>
+          }
+        </div>
+        <div appReveal class="mx-auto mt-10 flex max-w-3xl items-start gap-3 rounded-2xl border-2 border-destructive/30 bg-card p-5 shadow-soft">
+          <span class="mt-0.5 text-destructive"><app-icon [icon]="ShieldAlert" [size]="24" /></span>
+          <p class="font-semibold text-deep">Orientation, pas un diagnostic. <span class="font-normal text-muted-foreground">Clinic Copilot ne remplace ni un médecin ni les services d'urgence.</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Espaces -->
+    <section id="espaces" class="mx-auto max-w-7xl scroll-mt-20 px-4 py-20 sm:px-6">
+      <app-section-title eyebrow="Espaces" title="Un espace adapté à chaque rôle" />
+      <div class="grid gap-6 md:grid-cols-3">
+        <div appReveal><app-role-card title="Espace Patient" tagline="Simple, rapide et rassurant."><app-patient-mini /></app-role-card></div>
+        <div [appReveal]="100"><app-role-card title="Espace Médecin" tagline="Gérez votre agenda et vos patients."><app-doctor-mini /></app-role-card></div>
+        <div [appReveal]="200"><app-role-card title="Espace Administrateur" tagline="Supervisez, sécurisez, organisez."><app-admin-mini /></app-role-card></div>
+      </div>
+    </section>
+
+    <!-- Android -->
+    <section class="overflow-hidden bg-deep py-20">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6">
+        <app-section-title [light]="true" eyebrow="Application Android" title="Votre santé, toujours avec vous." text="Retrouvez l'assistant, vos médecins et vos rendez-vous dans votre poche." />
+        <div appReveal class="flex flex-wrap justify-center gap-8">
+          <app-phone-mockup><app-phone-login /></app-phone-mockup>
+          <app-phone-mockup class="lg:-translate-y-6"><app-phone-chat /></app-phone-mockup>
+          <app-phone-mockup><app-phone-doctors /></app-phone-mockup>
+        </div>
+        <div class="mt-10 flex justify-center">
+          <button type="button" class="btn btn-light btn-lg"><app-icon [icon]="Smartphone" [size]="16" />Bientôt sur Google Play</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sécurité -->
+    <section id="securite" class="mx-auto max-w-7xl scroll-mt-20 px-4 py-20 sm:px-6">
+      <app-section-title eyebrow="Sécurité" title="Sécurité et confidentialité" text="Vos données de santé méritent la plus grande protection." />
+      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        @for (s of security; track s.title; let i = $index) {
+          <div [appReveal]="i * 70"><app-feature-card [item]="s" /></div>
+        }
+      </div>
+    </section>
+
+    <!-- Appel à l'action -->
+    <section class="px-4 pb-20 sm:px-6">
+      <div appReveal class="mx-auto max-w-5xl rounded-3xl bg-gradient-primary p-10 text-center shadow-soft sm:p-14">
+        <h2 class="text-3xl font-bold text-primary-foreground sm:text-4xl">Prêt à être bien orienté ?</h2>
+        <p class="mx-auto mt-4 max-w-xl text-primary-foreground/85">Créez votre compte gratuitement et laissez l'IA vous guider vers les bons soins.</p>
+        <div class="mt-8 flex flex-wrap justify-center gap-3">
+          <a routerLink="/inscription" class="btn btn-light btn-lg">Commencer</a>
+          <a routerLink="/connexion" class="btn btn-ghost btn-lg rounded-full text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">Se connecter</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <app-footer />
+</div>
