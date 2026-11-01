@@ -130,6 +130,12 @@ services:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_URL: jdbc:postgresql://postgres:5432/clinic_appointments
+      IDENTITY_PROFILE_URL: http://identity-profile-service:8081
+      DOCTOR_DIRECTORY_URL: http://doctor-directory-service:8082
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_DEFAULT_PASS:-guest}
       JAVA_TOOL_OPTIONS: -Xmx256m
 
   ai-assessment-service:
