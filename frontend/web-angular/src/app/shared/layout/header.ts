@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideMenu, LucideX } from '@lucide/angular';
+import { AuthService } from '../../core/auth/auth.service';
 import { Icon } from '../ui/icon';
 import { Logo } from './logo';
 import { navLinks } from '../../features/landing/landing.data';
@@ -19,8 +20,13 @@ import { navLinks } from '../../features/landing/landing.data';
           <a routerLink="/medecins" class="text-sm font-semibold text-destructive transition-opacity duration-200 hover:opacity-80">Médecins</a>
         </nav>
         <div class="hidden items-center gap-2 lg:flex">
-          <a routerLink="/connexion" class="btn btn-ghost">Se connecter</a>
-          <a routerLink="/inscription" class="btn btn-hero">Commencer</a>
+          @if (auth.session(); as s) {
+            <span class="max-w-[200px] truncate text-sm text-muted-foreground">{{ s.email }}</span>
+            <button type="button" class="btn btn-soft" (click)="auth.logout()">Se déconnecter</button>
+          } @else {
+            <a routerLink="/connexion" class="btn btn-ghost">Se connecter</a>
+            <a routerLink="/inscription" class="btn btn-hero">Commencer</a>
+          }
         </div>
         <button type="button" class="btn btn-ghost btn-icon lg:hidden" (click)="open.set(!open())"
                 [attr.aria-label]="open() ? 'Fermer le menu' : 'Ouvrir le menu'" [attr.aria-expanded]="open()">
@@ -35,16 +41,22 @@ import { navLinks } from '../../features/landing/landing.data';
             }
             <a routerLink="/medecins" (click)="open.set(false)" class="rounded-lg px-3 py-3 font-semibold text-destructive hover:bg-soft">Médecins</a>
           </nav>
-          <div class="mt-4 grid grid-cols-2 gap-3">
-            <a routerLink="/connexion" class="btn btn-soft">Se connecter</a>
-            <a routerLink="/inscription" class="btn btn-hero">Commencer</a>
-          </div>
+          @if (auth.session(); as s) {
+            <p class="mt-4 truncate px-3 text-sm text-muted-foreground">{{ s.email }}</p>
+            <button type="button" class="btn btn-soft mt-2 w-full" (click)="open.set(false); auth.logout()">Se déconnecter</button>
+          } @else {
+            <div class="mt-4 grid grid-cols-2 gap-3">
+              <a routerLink="/connexion" (click)="open.set(false)" class="btn btn-soft">Se connecter</a>
+              <a routerLink="/inscription" (click)="open.set(false)" class="btn btn-hero">Commencer</a>
+            </div>
+          }
         </div>
       }
     </header>
   `,
 })
 export class Header {
+  protected readonly auth = inject(AuthService);
   protected readonly links = navLinks;
   protected readonly open = signal(false);
   protected readonly Menu = LucideMenu;
