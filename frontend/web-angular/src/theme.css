@@ -107,3 +107,6 @@
   .btn-light { @apply rounded-full bg-card text-deep hover:bg-soft; }
   .btn-ghost { @apply hover:bg-soft hover:text-primary; }
 }
+@layer components {
+  .field { @apply h-10 w-full rounded-lg border border-input bg-card px-3 text-sm text-foreground outline-none transition focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50; }
+}

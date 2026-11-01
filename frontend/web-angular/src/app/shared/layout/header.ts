@@ -16,6 +16,7 @@ import { navLinks } from '../../features/landing/landing.data';
           @for (l of links; track l.fragment) {
             <a routerLink="/" [fragment]="l.fragment" class="text-sm font-medium text-muted-foreground transition-colors duration-200 hover:text-primary">{{ l.label }}</a>
           }
+          <a routerLink="/medecins" class="text-sm font-semibold text-destructive transition-opacity duration-200 hover:opacity-80">Médecins</a>
         </nav>
         <div class="hidden items-center gap-2 lg:flex">
           <a routerLink="/connexion" class="btn btn-ghost">Se connecter</a>
@@ -32,6 +33,7 @@ import { navLinks } from '../../features/landing/landing.data';
             @for (l of links; track l.fragment) {
               <a routerLink="/" [fragment]="l.fragment" (click)="open.set(false)" class="rounded-lg px-3 py-3 font-medium text-foreground hover:bg-soft">{{ l.label }}</a>
             }
+            <a routerLink="/medecins" (click)="open.set(false)" class="rounded-lg px-3 py-3 font-semibold text-destructive hover:bg-soft">Médecins</a>
           </nav>
           <div class="mt-4 grid grid-cols-2 gap-3">
             <a routerLink="/connexion" class="btn btn-soft">Se connecter</a>

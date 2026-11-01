@@ -1,0 +1,152 @@
+<div class="min-h-screen">
+  <app-header />
+  <main>
+    <section class="bg-gradient-soft">
+      <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+        <div appReveal>
+          <p class="text-sm font-semibold uppercase tracking-widest text-primary">Annuaire</p>
+          <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-deep sm:text-4xl">
+            Trouvez le bon <span class="text-gradient">médecin</span>
+          </h1>
+          <p class="mt-3 max-w-2xl text-muted-foreground">Recherchez par nom, spécialité, langue ou ville.</p>
+                    <button type="button" class="btn btn-lg mt-5 rounded-full bg-destructive text-primary-foreground shadow-soft hover:opacity-90" [disabled]="geoBusy()" (click)="urgence()">
+            <app-icon [icon]="Alert" [size]="16" />{{ geoBusy() ? 'Localisation…' : 'Urgence : médecins proches' }}
+          </button>
+          <p class="mt-2 max-w-xl text-xs text-muted-foreground">Affiche les médecins généralistes les plus proches de vous. Cela ne remplace pas les services d'urgence.</p>
+        </div>
+
+        <!-- Filtres -->
+        <form class="mt-8 rounded-2xl border border-border bg-card p-4 shadow-soft sm:p-6" (submit)="$event.preventDefault()" role="search">
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="sm:col-span-2">
+              <label for="f-q" class="mb-1 block text-xs font-medium text-muted-foreground">Nom ou mot-clé</label>
+              <div class="relative">
+                <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"><app-icon [icon]="Search" [size]="16" /></span>
+                <input id="f-q" type="search" class="field pl-9" placeholder="Ex. Ben Salah" [value]="qText()" (input)="onQ($any($event.target).value)" />
+              </div>
+            </div>
+
+            <div>
+              <label for="f-specialty" class="mb-1 block text-xs font-medium text-muted-foreground">Spécialité</label>
+              <select id="f-specialty" class="field" [value]="filters().specialty ?? ''" (change)="onSelect('specialty', $any($event.target).value)">
+                <option value="">Toutes</option>
+                @for (s of specialties(); track s.code) {
+                  <option [value]="s.code" [selected]="s.code === filters().specialty">{{ s.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label for="f-language" class="mb-1 block text-xs font-medium text-muted-foreground">Langue</label>
+              <select id="f-language" class="field" (change)="onSelect('language', $any($event.target).value)">
+                <option value="">Toutes</option>
+                @for (l of languages(); track l.code) {
+                  <option [value]="l.code" [selected]="l.code === filters().language">{{ l.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label for="f-city" class="mb-1 block text-xs font-medium text-muted-foreground">Ville</label>
+              <input id="f-city" type="text" class="field" placeholder="Ex. Tunis" [value]="cityText()" (input)="onCity($any($event.target).value)" />
+            </div>
+
+            <div>
+              <label for="f-sort" class="mb-1 block text-xs font-medium text-muted-foreground">Trier par</label>
+              <select id="f-sort" class="field" (change)="onSelect('sort', $any($event.target).value)">
+                <option value="" [selected]="!filters().sort">Par défaut</option>
+                <option value="name" [selected]="filters().sort === 'name'">Nom (A à Z)</option>
+                <option value="distance" [selected]="filters().sort === 'distance'" [disabled]="!nearby()">Distance</option>
+              </select>
+            </div>
+
+            <div class="flex items-end gap-2">
+              <button type="button" class="btn flex-1" [class]="nearby() ? 'btn-hero' : 'btn-soft'" [disabled]="geoBusy()" (click)="toggleNearby()">
+                <app-icon [icon]="Navigation" [size]="16" />
+                {{ geoBusy() ? 'Localisation…' : nearby() ? 'Autour de moi : activé' : 'Autour de moi' }}
+              </button>
+            </div>
+
+            @if (nearby()) {
+              <div>
+                <label for="f-radius" class="mb-1 block text-xs font-medium text-muted-foreground">Rayon</label>
+                <select id="f-radius" class="field" (change)="onRadius($any($event.target).value)">
+                  @for (r of radii; track r) {
+                    <option [value]="r" [selected]="r === (filters().radiusKm ?? 25)">{{ r }} km</option>
+                  }
+                </select>
+              </div>
+            }
+          </div>
+
+          @if (geoError()) {
+            <p class="mt-3 text-sm text-destructive" role="alert">{{ geoError() }}</p>
+          }
+        </form>
+      </div>
+    </section>
+
+    <!-- Résultats -->
+    <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6" aria-live="polite">
+      <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <p class="text-sm text-muted-foreground">
+          @if (page(); as p) {
+            <strong class="text-deep">{{ p.totalElements }}</strong> médecin{{ p.totalElements > 1 ? 's' : '' }} trouvé{{ p.totalElements > 1 ? 's' : '' }}
+          } @else if (loading()) {
+            Recherche en cours…
+          }
+        </p>
+        @if (hasFilters()) {
+          <button type="button" class="btn btn-ghost" (click)="reset()"><app-icon [icon]="Reset" [size]="16" />Réinitialiser les filtres</button>
+        }
+      </div>
+
+      @if (loading()) {
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          @for (i of skeletons; track i) {
+            <div class="h-64 animate-pulse rounded-2xl border border-border bg-muted"></div>
+          }
+        </div>
+      } @else if (failed()) {
+        <div class="mx-auto max-w-md rounded-2xl border border-destructive/30 bg-card p-8 text-center shadow-soft">
+          <h2 class="text-lg font-semibold text-deep">Impossible de charger les médecins</h2>
+          <p class="mt-2 text-sm text-muted-foreground">Vérifiez que le service est démarré, puis réessayez.</p>
+          <button type="button" class="btn btn-hero mt-5" (click)="retry()">Réessayer</button>
+        </div>
+      } @else if (page(); as p) {
+        @if (p.content.length) {
+          <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            @for (d of p.content; track d.id; let i = $index) {
+              <div [appReveal]="i * 50"><app-doctor-card [doctor]="d" /></div>
+            }
+          </div>
+
+          @if (p.totalPages > 1) {
+            <nav class="mt-10 flex items-center justify-center gap-4" aria-label="Pagination">
+              <button type="button" class="btn btn-soft" [disabled]="p.page === 0" (click)="goTo(p.page - 1)"><app-icon [icon]="Prev" [size]="16" />Précédent</button>
+              <span class="text-sm text-muted-foreground">Page {{ p.page + 1 }} sur {{ p.totalPages }}</span>
+              <button type="button" class="btn btn-soft" [disabled]="p.page + 1 >= p.totalPages" (click)="goTo(p.page + 1)">Suivant<app-icon [icon]="Next" [size]="16" /></button>
+            </nav>
+          }
+        } @else {
+          <div class="mx-auto max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-soft">
+            <h2 class="text-lg font-semibold text-deep">Aucun médecin trouvé</h2>
+            <p class="mt-2 text-sm text-muted-foreground">Essayez d'élargir votre recherche ou de retirer un filtre.</p>
+            @if (hasFilters()) {
+              <button type="button" class="btn btn-hero mt-5" (click)="reset()">Réinitialiser les filtres</button>
+            }
+          </div>
+        }
+      }
+    </section>
+  </main>
+      <div class="bg-destructive text-primary-foreground">
+      <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <p class="flex items-center gap-2 text-sm font-semibold">
+          <app-icon [icon]="Alert" [size]="18" />En cas d'urgence vitale, appelez le 190 (SAMU).
+        </p>
+        <a href="tel:190" class="btn btn-light h-8 text-destructive">Appeler le 190</a>
+      </div>
+    </div>
+  <app-footer />
+</div>
