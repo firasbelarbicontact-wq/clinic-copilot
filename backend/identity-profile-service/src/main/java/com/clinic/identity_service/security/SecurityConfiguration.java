@@ -7,7 +7,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 @Configuration 
 public class SecurityConfiguration {
@@ -17,25 +16,25 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public OncePerRequestFilter jwtAuthentificationFilter(JwtService jwtService, CustomUserDetailsService customUserDetailsService) {
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtService jwtService, CustomUserDetailsService customUserDetailsService) {
         return new JwtAuthenticationFilter(jwtService, customUserDetailsService);
     }
 
     @Bean
-
-    public SecurityFilterChain seecurityFilterChain(
+    public SecurityFilterChain securityFilterChain(
         HttpSecurity http,
-        OncePerRequestFilter jwtAuthenticationFilter
+        JwtAuthenticationFilter jwtAuthenticationFilter
     ) throws Exception {
+
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/register",
-                    "/api/auth/login"
-                ).permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(
+                jwtAuthenticationFilter,
+                UsernamePasswordAuthenticationFilter.class
+            );
 
         return http.build();
     }

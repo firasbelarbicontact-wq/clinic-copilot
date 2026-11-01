@@ -95,16 +95,22 @@ services:
     <<: *spring-common
     build: ../backend/identity-profile-service
     image: ${DOCKERHUB_USER:-clinic}/clinic-identity-profile-service:1.0
+    ports:
+      - "8081:8081"
     environment:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_URL: jdbc:postgresql://postgres:5432/clinic_identity
+      JWT_SECRET: ${JWT_SECRET}
+      PATIENT_SERVICE_URL: http://patient-profile-service:8090
       JAVA_TOOL_OPTIONS: -Xmx256m
 
   patient-profile-service:
     <<: *spring-common
     build: ../backend/patient-profile-service
     image: ${DOCKERHUB_USER:-clinic}/clinic-patient-profile-service:1.0
+    ports:
+      - "8090:8090"
     environment:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}

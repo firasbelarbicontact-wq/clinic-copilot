@@ -14,7 +14,12 @@ spring:
     open-in-view: false
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:9f7c2a8e4d1b6f03a5c9e2d7b8f1a604c3e9d6b2f7a0e5c8d1b4f9a6e3c7d205}
+
+patient:
+  service:
+    url: ${PATIENT_SERVICE_URL:http://localhost:8090}
+
 management:
   endpoints:
     web:
