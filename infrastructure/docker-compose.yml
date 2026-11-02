@@ -110,7 +110,7 @@ services:
     build: ../backend/patient-profile-service
     image: ${DOCKERHUB_USER:-clinic}/clinic-patient-profile-service:1.0
     ports:
-      - "8090:8090"
+      - "18091:8090"
     environment:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}

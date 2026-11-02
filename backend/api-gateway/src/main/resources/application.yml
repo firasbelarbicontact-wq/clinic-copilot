@@ -10,3 +10,14 @@ management:
     web:
       exposure:
         include: health
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: identity-auth
+              uri: http://identity-profile-service:8081
+              predicates:
+                - Path=/api/auth/**

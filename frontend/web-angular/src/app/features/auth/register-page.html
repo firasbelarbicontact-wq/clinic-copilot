@@ -1,0 +1,130 @@
+<div class="min-h-screen">
+  <app-header />
+  <main class="relative overflow-hidden bg-gradient-soft">
+    <div class="pointer-events-none absolute -right-36 -top-32 h-[440px] w-[440px] rounded-full bg-tertiary/15 blur-3xl"></div>
+    <div class="pointer-events-none absolute -bottom-48 -left-32 h-[440px] w-[440px] rounded-full bg-primary/10 blur-3xl"></div>
+
+    <div class="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20 lg:py-20">
+      <section class="max-w-xl">
+        <span class="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3 py-1 text-sm font-medium text-primary">
+          <span class="h-2 w-2 rounded-full bg-tertiary"></span>
+          Votre santé, au même endroit
+        </span>
+        <h1 class="mt-6 text-4xl font-extrabold leading-tight tracking-tight text-deep sm:text-5xl">
+          Créez votre <span class="text-gradient">espace patient.</span>
+        </h1>
+        <p class="mt-5 max-w-lg text-lg leading-8 text-muted-foreground">
+          Inscrivez-vous pour retrouver les outils qui vous accompagnent dans votre parcours de soins.
+        </p>
+
+        <div class="mt-8 space-y-4">
+          <div class="flex items-start gap-3">
+            <span class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">1</span>
+            <p class="text-sm leading-6 text-muted-foreground"><span class="font-semibold text-deep">Un espace personnel</span> pour démarrer votre parcours de santé.</p>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">2</span>
+            <p class="text-sm leading-6 text-muted-foreground"><span class="font-semibold text-deep">Une orientation assistée</span> pour vous aider à trouver les bons soins.</p>
+          </div>
+        </div>
+        <p class="mt-8 border-l-2 border-tertiary pl-4 text-sm leading-6 text-muted-foreground">
+          L’IA vous oriente, le médecin décide. Clinic Copilot ne remplace pas un avis médical.
+        </p>
+      </section>
+
+      <section class="mx-auto w-full max-w-xl rounded-3xl border border-border/70 bg-card p-6 shadow-soft sm:p-9" aria-labelledby="register-title">
+        @if (registered()) {
+          <div class="py-8 text-center">
+            <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-success/15 text-2xl font-bold text-success" aria-hidden="true">✓</span>
+            <h2 id="register-title" class="mt-5 text-2xl font-bold tracking-tight text-deep">Votre compte est créé !</h2>
+            <p class="mt-3 text-sm leading-6 text-muted-foreground">Votre espace patient est prêt. Vous pouvez revenir à l’accueil.</p>
+            <a routerLink="/" class="btn btn-hero mt-7">Retour à l’accueil</a>
+          </div>
+        } @else {
+          <div class="mb-7">
+            <p class="text-sm font-semibold uppercase tracking-wider text-primary">Inscription patient</p>
+            <h2 id="register-title" class="mt-2 text-2xl font-bold tracking-tight text-deep sm:text-3xl">Créer mon compte</h2>
+            <p class="mt-2 text-sm text-muted-foreground">Quelques informations suffisent pour commencer.</p>
+          </div>
+
+          @if (errorMessage()) {
+            <div class="mb-5 rounded-xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm text-destructive" role="alert">
+              {{ errorMessage() }}
+            </div>
+          }
+
+          <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="space-y-5">
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label for="firstName" class="mb-1.5 block text-sm font-medium text-deep">Prénom</label>
+                <input id="firstName" formControlName="firstName" type="text" autocomplete="given-name" class="field" placeholder="Votre prénom" />
+                @if (form.controls.firstName.touched && form.controls.firstName.hasError('required')) {
+                  <p class="mt-1 text-xs text-destructive">Votre prénom est obligatoire.</p>
+                }
+              </div>
+              <div>
+                <label for="lastName" class="mb-1.5 block text-sm font-medium text-deep">Nom</label>
+                <input id="lastName" formControlName="lastName" type="text" autocomplete="family-name" class="field" placeholder="Votre nom" />
+                @if (form.controls.lastName.touched && form.controls.lastName.hasError('required')) {
+                  <p class="mt-1 text-xs text-destructive">Votre nom est obligatoire.</p>
+                }
+              </div>
+            </div>
+
+            <div>
+              <label for="email" class="mb-1.5 block text-sm font-medium text-deep">Adresse e-mail</label>
+              <input id="email" formControlName="email" type="email" autocomplete="email" class="field" placeholder="vous@exemple.fr" />
+              @if (form.controls.email.touched && form.controls.email.hasError('required')) {
+                <p class="mt-1 text-xs text-destructive">Votre adresse e-mail est obligatoire.</p>
+              } @else if (form.controls.email.touched && form.controls.email.hasError('email')) {
+                <p class="mt-1 text-xs text-destructive">Saisissez une adresse e-mail valide.</p>
+              }
+            </div>
+
+            <div>
+              <label for="dateOfBirth" class="mb-1.5 block text-sm font-medium text-deep">Date de naissance</label>
+              <input id="dateOfBirth" formControlName="dateOfBirth" type="date" autocomplete="bday" [max]="today" class="field" />
+              @if (form.controls.dateOfBirth.touched && form.controls.dateOfBirth.hasError('required')) {
+                <p class="mt-1 text-xs text-destructive">Votre date de naissance est obligatoire.</p>
+              }
+            </div>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label for="password" class="mb-1.5 block text-sm font-medium text-deep">Mot de passe</label>
+                <input id="password" formControlName="password" type="password" autocomplete="new-password" class="field" placeholder="8 caractères minimum" />
+                @if (form.controls.password.touched && form.controls.password.hasError('required')) {
+                  <p class="mt-1 text-xs text-destructive">Choisissez un mot de passe.</p>
+                } @else if (form.controls.password.touched && form.controls.password.hasError('minlength')) {
+                  <p class="mt-1 text-xs text-destructive">8 caractères minimum.</p>
+                }
+              </div>
+              <div>
+                <label for="confirmPassword" class="mb-1.5 block text-sm font-medium text-deep">Confirmer le mot de passe</label>
+                <input id="confirmPassword" formControlName="confirmPassword" type="password" autocomplete="new-password" class="field" placeholder="Répétez le mot de passe" />
+                @if (form.controls.confirmPassword.touched && form.controls.confirmPassword.hasError('required')) {
+                  <p class="mt-1 text-xs text-destructive">Confirmez votre mot de passe.</p>
+                } @else if (form.controls.confirmPassword.touched && form.hasError('passwordMismatch')) {
+                  <p class="mt-1 text-xs text-destructive">Les mots de passe ne correspondent pas.</p>
+                }
+              </div>
+            </div>
+
+            <p class="text-xs leading-5 text-muted-foreground">
+              Vos informations sont utilisées pour créer votre compte patient.
+            </p>
+            <button type="submit" class="btn btn-hero h-11 w-full" [disabled]="submitting()">
+              {{ submitting() ? 'Création du compte…' : 'Créer mon compte' }}
+            </button>
+          </form>
+
+          <p class="mt-6 text-center text-sm text-muted-foreground">
+            Vous avez déjà un compte ?
+            <a routerLink="/connexion" class="font-semibold text-primary hover:underline">Se connecter</a>
+          </p>
+        }
+      </section>
+    </div>
+  </main>
+  <app-footer />
+</div>
