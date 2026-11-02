@@ -27,14 +27,14 @@ export class AuthService {
     return this.http.post<UserResponse>(`${API_BASE_URL}/api/auth/register`, body);
   }
 
-  logout() {
+    logout(redirect = true) {
     this._session.set(null);
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch {
       /* stockage indisponible : on ignore */
     }
-    this.router.navigateByUrl('/');
+    if (redirect) this.router.navigateByUrl('/');
   }
 
   private save(r: AuthResponse) {

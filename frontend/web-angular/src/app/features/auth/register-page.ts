@@ -107,6 +107,12 @@ const ALLOWED = ['application/pdf', 'image/jpeg', 'image/png'];
               <p class="-mt-3 text-xs font-medium text-destructive">Votre consentement est nécessaire pour créer un compte patient.</p>
             }
           } @else {
+            @if (refsError()) {
+              <p role="alert" class="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-destructive/10 p-3 text-sm font-medium text-destructive">
+                Impossible de charger les spécialités et les langues. Vérifiez que le service médecins est démarré.
+                <button type="button" class="btn btn-soft h-8" (click)="loadRefs()">Réessayer</button>
+              </p>
+            }
             <div class="grid gap-5 sm:grid-cols-2">
               <div>
                 <label for="specialtyCode" class="mb-1.5 block text-sm font-medium text-deep">Spécialité</label>
@@ -203,6 +209,7 @@ export class RegisterPage {
   protected readonly busy = signal(false);
   protected readonly done = signal(false);
   protected readonly error = signal<string | null>(null);
+  protected readonly refsError = signal(false);
   protected readonly specialties = signal<RefItem[]>([]);
   protected readonly languages = signal<RefItem[]>([]);
   protected readonly langs = signal<string[]>([]);
@@ -229,9 +236,20 @@ export class RegisterPage {
   );
 
   constructor() {
-    this.onboarding.specialties().subscribe({ next: (s) => this.specialties.set(s), error: () => {} });
-    this.onboarding.languages().subscribe({ next: (l) => this.languages.set(l), error: () => {} });
+    this.loadRefs();
     this.applyRole('PATIENT');
+  }
+
+  protected loadRefs() {
+    this.refsError.set(false);
+    this.onboarding.specialties().subscribe({
+      next: (s) => this.specialties.set(s),
+      error: () => this.refsError.set(true),
+    });
+    this.onboarding.languages().subscribe({
+      next: (l) => this.languages.set(l),
+      error: () => this.refsError.set(true),
+    });
   }
 
   protected bad(name: keyof typeof this.form.controls) {
@@ -278,6 +296,13 @@ export class RegisterPage {
     if (isDoctor && !this.file()) this.fileError.set('Veuillez joindre votre diplôme.');
     if (this.form.invalid || (isDoctor && !this.file())) {
       this.form.markAllAsTouched();
+      const invalid = Object.entries(this.form.controls)
+        .filter(([, c]) => c.invalid)
+        .map(([name]) => name);
+      if (this.form.hasError('mismatch')) invalid.push('confirm (mots de passe différents)');
+      if (isDoctor && !this.file()) invalid.push('diplomaFile');
+      console.warn('Formulaire invalide, champs concernés :', invalid);
+      this.error.set('Veuillez corriger les champs signalés en rouge.');
       return;
     }
     const v = this.form.getRawValue();
@@ -320,7 +345,7 @@ export class RegisterPage {
       )
       .subscribe({
         next: () => {
-          this.auth.logout();
+          this.auth.logout(false);
           this.finish();
         },
         error: (e: any) => {
