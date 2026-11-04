@@ -33,6 +33,7 @@ export const routes: Routes = [
     canActivate: [roleGuard('ADMIN')],
     loadComponent: () => import('./features/admin/admin-page').then((m) => m.AdminPage),
   },
+    
     {
     path: 'espace-medecin',
     canActivate: [roleGuard('DOCTOR')],
@@ -42,6 +43,16 @@ export const routes: Routes = [
         path: '',
         loadComponent: () => import('./features/doctors/doctor-home-page').then((m) => m.DoctorHomePage),
         title: 'Espace Médecin · Clinic Copilot',
+      },
+      {
+        path: 'profil',
+        loadComponent: () => import('./features/doctors/my-profile-page').then((m) => m.MyProfilePage),
+        title: 'Mon profil · Clinic Copilot',
+      },
+      {
+        path: 'diplomes',
+        loadComponent: () => import('./features/doctors/my-diplomas-page').then((m) => m.MyDiplomasPage),
+        title: 'Mes diplômes · Clinic Copilot',
       },
     ],
   },
