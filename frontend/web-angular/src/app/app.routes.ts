@@ -33,4 +33,16 @@ export const routes: Routes = [
     canActivate: [roleGuard('ADMIN')],
     loadComponent: () => import('./features/admin/admin-page').then((m) => m.AdminPage),
   },
+    {
+    path: 'espace-medecin',
+    canActivate: [roleGuard('DOCTOR')],
+    loadComponent: () => import('./features/doctors/doctor-space').then((m) => m.DoctorSpace),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/doctors/doctor-home-page').then((m) => m.DoctorHomePage),
+        title: 'Espace Médecin · Clinic Copilot',
+      },
+    ],
+  },
 ];

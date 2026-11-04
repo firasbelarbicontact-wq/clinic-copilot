@@ -102,7 +102,9 @@ export class LoginPage {
     this.auth.login({ email: email.trim(), password }).subscribe({
         next: (res) => {
         this.busy.set(false);
-        this.router.navigateByUrl(hasRole(res, 'ADMIN') ? '/admin' : '/medecins');
+        this.router.navigateByUrl(
+          hasRole(res, 'ADMIN') ? '/admin' : hasRole(res, 'DOCTOR') ? '/espace-medecin' : '/medecins',
+        );
       },
       error: (e: unknown) => {
         this.busy.set(false);
