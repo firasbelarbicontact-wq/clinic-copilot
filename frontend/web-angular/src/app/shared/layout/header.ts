@@ -5,6 +5,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { Icon } from '../ui/icon';
 import { Logo } from './logo';
 import { navLinks } from '../../features/landing/landing.data';
+import { hasRole } from '../../core/auth/role.guard';
 
 @Component({
   selector: 'app-header',
@@ -22,6 +23,9 @@ import { navLinks } from '../../features/landing/landing.data';
         <div class="hidden items-center gap-2 lg:flex">
           @if (auth.session(); as s) {
             <span class="max-w-[200px] truncate text-sm text-muted-foreground">{{ s.email }}</span>
+          @if (spaceLink(); as sp) {
+              <a [routerLink]="sp.to" class="btn btn-hero">{{ sp.label }}</a>
+            }
             <button type="button" class="btn btn-soft" (click)="auth.logout()">Se déconnecter</button>
           } @else {
             <a routerLink="/connexion" class="btn btn-ghost">Se connecter</a>
@@ -43,6 +47,9 @@ import { navLinks } from '../../features/landing/landing.data';
           </nav>
           @if (auth.session(); as s) {
             <p class="mt-4 truncate px-3 text-sm text-muted-foreground">{{ s.email }}</p>
+          @if (spaceLink(); as sp) {
+              <a [routerLink]="sp.to" (click)="open.set(false)" class="btn btn-hero mt-4 w-full">{{ sp.label }}</a>
+            }
             <button type="button" class="btn btn-soft mt-2 w-full" (click)="open.set(false); auth.logout()">Se déconnecter</button>
           } @else {
             <div class="mt-4 grid grid-cols-2 gap-3">
@@ -61,4 +68,10 @@ export class Header {
   protected readonly open = signal(false);
   protected readonly Menu = LucideMenu;
   protected readonly X = LucideX;
+  protected spaceLink(): { label: string; to: string } | null {
+      const s = this.auth.session();
+      if (hasRole(s, 'ADMIN')) return { label: 'Espace admin', to: '/admin' };
+      if (hasRole(s, 'DOCTOR')) return { label: 'Mon espace', to: '/espace-medecin' };
+      return null;
+  }
 }

@@ -28,10 +28,17 @@ export const routes: Routes = [
   path: 'mot-de-passe-oublie',
   loadComponent: () => import('./features/auth/forgot-password-page').then((m) => m.ForgotPasswordPage),
   },
-  {
+    {
     path: 'admin',
     canActivate: [roleGuard('ADMIN')],
-    loadComponent: () => import('./features/admin/admin-page').then((m) => m.AdminPage),
+    loadComponent: () => import('./features/admin/admin-space').then((m) => m.AdminSpace),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/admin/admin-page').then((m) => m.AdminPage),
+        title: 'Vérification des médecins · Clinic Copilot',
+      },
+    ],
   },
     
     {
