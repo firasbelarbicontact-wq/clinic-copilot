@@ -12,6 +12,7 @@ import { Header } from '../../shared/layout/header';
 import { Icon } from '../../shared/ui/icon';
 import { PublicDoctorDetail } from './models/doctor.models';
 import { DirectoryService } from './services/directory.service';
+import { DoctorReviews } from '../reviews/doctor-reviews';
 
 type ProfileState =
   | { status: 'loading' }
@@ -21,7 +22,7 @@ type ProfileState =
 
 @Component({
   selector: 'app-doctor-profile-page',
-  imports: [Header, Footer, Icon, RouterLink, RevealDirective],
+  imports: [Header, Footer, Icon, RouterLink, RevealDirective, DoctorReviews],
   template: `
     <div class="min-h-screen">
       <app-header />
@@ -110,7 +111,7 @@ type ProfileState =
               </aside>
             </div>
           </article>
-
+          <app-doctor-reviews class="mt-8 block" [doctorId]="d.id" />
           <p class="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
             <span class="text-destructive"><app-icon [icon]="Alert" [size]="16" /></span>
             En cas d'urgence vitale, appelez le <a href="tel:190" class="font-semibold text-destructive underline">190 (SAMU)</a>.
