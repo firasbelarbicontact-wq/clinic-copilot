@@ -4,6 +4,21 @@
     "secure": false,
     "changeOrigin": true
   },
+  "/api/reviews": {
+    "target": "http://127.0.0.1:8088",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/api/admin/reviews": {
+    "target": "http://127.0.0.1:8088",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "^/api/doctors/[^/]+/(reviews|rating)": {
+    "target": "http://127.0.0.1:8088",
+    "secure": false,
+    "changeOrigin": true
+  },
   "/api": {
     "target": "http://127.0.0.1:8082",
     "secure": false,
