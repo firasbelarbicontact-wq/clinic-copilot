@@ -31,8 +31,8 @@ management:
 app:
   security:
     jwt:
-      # Clé HS256 partagée avec Identity (M1). À remplacer quand M1 a choisi son mode de signature.
-      secret: ${JWT_SECRET:dev-only-secret-change-me-0123456789}
+      
+      secret: ${JWT_SECRET:ZGV2LW9ubHktc2VjcmV0LWNoYW5nZS1tZS0wMTIzNDU2Nzg5}
       roles-claim: ${JWT_ROLES_CLAIM:role}
   storage:
     diplomas-dir: ${DIPLOMAS_DIR:./data/diplomas}
