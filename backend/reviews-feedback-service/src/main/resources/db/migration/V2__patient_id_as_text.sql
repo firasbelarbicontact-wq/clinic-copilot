@@ -1,0 +1,1 @@
+ALTER TABLE reviews ALTER COLUMN patient_id TYPE VARCHAR(100) USING patient_id::text;
