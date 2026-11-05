@@ -5,13 +5,22 @@ spring:
   application:
     name: reviews-feedback-service
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/clinic_reviews}
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/clinic_reviews}
     username: ${DB_USER:clinic}
     password: ${DB_PASSWORD:secret}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     open-in-view: false
+  flyway:
+    enabled: true
+
+app:
+  security:
+    jwt:
+      # Secret en Base64, identique à celui d'Identity
+      secret: ${JWT_SECRET:ZGV2LW9ubHktc2VjcmV0LWNoYW5nZS1tZS0wMTIzNDU2Nzg5}
+      roles-claim: ${JWT_ROLES_CLAIM:role}
 
 management:
   endpoints:
