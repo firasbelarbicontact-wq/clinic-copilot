@@ -71,6 +71,11 @@ services:
     restart: unless-stopped
     environment:
       JAVA_TOOL_OPTIONS: -Xmx256m
+      IDENTITY_URL: http://identity-profile-service:8081
+      PATIENT_URL: http://patient-profile-service:8090
+      REVIEWS_URL: http://reviews-feedback-service:8088
+      DOCTOR_URL: http://doctor-directory-service:8082
+      APPOINTMENT_URL: http://appointment-service:8084
     ports:
       - "8090:8080"
 
