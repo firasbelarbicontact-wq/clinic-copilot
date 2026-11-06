@@ -1,0 +1,54 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: audit-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/audit_service_db
+    username: ${DB_USERNAME:audit_user}
+    password: ${DB_PASSWORD:audit_pass}
+
+  jpa:
+    hibernate:
+      ddl-auto: update   # fine for dev; switch to validate + Flyway/Liquibase before Sprint 8
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+# Shared HMAC secret used to validate JWTs issued by Identity Service.
+# MUST match the value configured in Identity Service and the API Gateway.
+# Never commit the real value -- set it via the JWT_SECRET environment
+# variable (e.g. in docker-compose.yml or a local .env file).
+jwt:
+  secret: ${JWT_SECRET:change-me-in-env-min-32-chars-long}
+
+# Shared key other backend services use to call POST /api/v1/audit-logs
+# directly. Same rule: never commit the real value.
+internal:
+  api-key: ${INTERNAL_API_KEY:change-me-in-env}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    com.cliniccopilot.audit: INFO
