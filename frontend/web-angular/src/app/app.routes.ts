@@ -61,6 +61,31 @@ export const routes: Routes = [
         loadComponent: () => import('./features/doctors/my-diplomas-page').then((m) => m.MyDiplomasPage),
         title: 'Mes diplômes · Clinic Copilot',
       },
+     { 
+        path: 'agenda',
+        loadComponent: () => import('./features/doctors/doctor-agenda-page').then((m) => m.DoctorAgendaPage),
+        title: 'Agenda · Clinic Copilot',
+      },
+            {
+        path: 'patients',
+        loadComponent: () => import('./features/doctors/doctor-patients-page').then((m) => m.DoctorPatientsPage),
+        title: 'Mes patients · Clinic Copilot',
+      },
+      {
+        path: 'messages',
+        loadComponent: () => import('./features/doctors/doctor-messages-page').then((m) => m.DoctorMessagesPage),
+        title: 'Messagerie · Clinic Copilot',
+      },
+      {
+        path: 'avis',
+        loadComponent: () => import('./features/doctors/doctor-reviews-page').then((m) => m.DoctorReviewsPage),
+        title: 'Avis reçus · Clinic Copilot',
+      },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./features/notifications/notifications-page').then((m) => m.NotificationsPage),
+        title: 'Notifications · Clinic Copilot',
+      },
     ],
   },
 ];
