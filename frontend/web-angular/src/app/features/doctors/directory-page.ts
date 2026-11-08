@@ -34,7 +34,7 @@ export class DirectoryPage {
   protected readonly Reset = LucideRotateCcw;
   protected readonly Prev = LucideChevronLeft;
   protected readonly Next = LucideChevronRight;
-    protected readonly Alert = LucideShieldAlert;
+  protected readonly Alert = LucideShieldAlert;
   protected readonly skeletons = [1, 2, 3, 4, 5, 6];
   protected readonly radii = [5, 10, 25, 50, 100,200];
 

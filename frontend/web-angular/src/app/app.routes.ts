@@ -14,7 +14,7 @@ export const routes: Routes = [
     loadComponent: () => import('./features/doctors/doctor-profile-page').then((m) => m.DoctorProfilePage),
     title: 'Fiche médecin · Clinic Copilot',
   },
-    {
+  {
     path: 'connexion',
     loadComponent: () => import('./features/auth/login-page').then((m) => m.LoginPage),
     title: 'Connexion · Clinic Copilot',
@@ -25,10 +25,67 @@ export const routes: Routes = [
     title: 'Créer un compte · Clinic Copilot',
   },
   {
-  path: 'mot-de-passe-oublie',
-  loadComponent: () => import('./features/auth/forgot-password-page').then((m) => m.ForgotPasswordPage),
+    path: 'mot-de-passe-oublie',
+    loadComponent: () => import('./features/auth/forgot-password-page').then((m) => m.ForgotPasswordPage),
+    title: 'Mot de passe oublié · Clinic Copilot',
   },
-    {
+
+  // ───────────── ESPACE PATIENT ─────────────
+  {
+    path: 'espace-patient',
+    canActivate: [roleGuard('PATIENT')],
+    loadComponent: () => import('./features/patient/patient-space').then((m) => m.PatientSpace),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/patient/patient-home-page').then((m) => m.PatientHomePage),
+        title: 'Espace Patient · Clinic Copilot',
+      },
+      {
+        path: 'rendez-vous',
+        loadComponent: () => import('./features/patient/appointments-page').then((m) => m.AppointmentsPage),
+        title: 'Mes rendez-vous · Clinic Copilot',
+      },
+      {
+        path: 'medecins',
+        loadComponent: () => import('./features/patient/doctors-page').then((m) => m.DoctorsPage),
+        title: 'Découvrir les médecins · Clinic Copilot',
+      },
+      {
+        path: 'medecins/:id',
+        loadComponent: () => import('./features/patient/doctor-detail-page').then((m) => m.DoctorDetailPage),
+        title: 'Fiche médecin · Clinic Copilot',
+      },
+      {
+        path: 'profil',
+        loadComponent: () => import('./features/patient/patient-profile-page').then((m) => m.PatientProfilePage),
+        title: 'Mon profil · Clinic Copilot',
+      },
+      {
+        path: 'messages',
+        loadComponent: () => import('./features/patient/patient-messages-page').then((m) => m.PatientMessagesPage),
+        title: 'Messagerie · Clinic Copilot',
+      },
+      {
+        path: 'assistant',
+        loadComponent: () => import('./features/patient/assistant-page').then((m) => m.AssistantPage),
+        title: 'Assistant IA · Clinic Copilot',
+      },
+      {
+        path: 'rappels',
+        loadComponent: () => import('./features/patient/reminders-page').then((m) => m.RemindersPage),
+        title: 'Rappels · Clinic Copilot',
+      },
+      {
+        path: 'parametres',
+        loadComponent: () => import('./features/patient/settings-page').then((m) => m.SettingsPage),
+        title: 'Paramètres · Clinic Copilot',
+      },
+    ],
+  },
+
+  // ───────────── ESPACE ADMIN ─────────────
+  {
     path: 'admin',
     canActivate: [roleGuard('ADMIN')],
     loadComponent: () => import('./features/admin/admin-space').then((m) => m.AdminSpace),
@@ -40,8 +97,9 @@ export const routes: Routes = [
       },
     ],
   },
-    
-    {
+
+  // ───────────── ESPACE MÉDECIN ─────────────
+  {
     path: 'espace-medecin',
     canActivate: [roleGuard('DOCTOR')],
     loadComponent: () => import('./features/doctors/doctor-space').then((m) => m.DoctorSpace),
@@ -61,12 +119,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/doctors/my-diplomas-page').then((m) => m.MyDiplomasPage),
         title: 'Mes diplômes · Clinic Copilot',
       },
-     { 
+      {
         path: 'agenda',
         loadComponent: () => import('./features/doctors/doctor-agenda-page').then((m) => m.DoctorAgendaPage),
         title: 'Agenda · Clinic Copilot',
       },
-            {
+      {
         path: 'patients',
         loadComponent: () => import('./features/doctors/doctor-patients-page').then((m) => m.DoctorPatientsPage),
         title: 'Mes patients · Clinic Copilot',
