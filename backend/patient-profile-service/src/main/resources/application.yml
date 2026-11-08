@@ -6,8 +6,8 @@ spring:
     name: patient-profile-service
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5433/clinic_patients}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD}
+    username: ${DB_USER:clinic}
+    password: ${DB_PASSWORD:secret}
   jpa:
     hibernate:
       ddl-auto: update
