@@ -54,11 +54,13 @@ function readCollapsed(): boolean {
         <!-- Logo -->
         <div class="flex h-16 items-center px-5" [class.justify-center]="collapsed()" [class.px-0]="collapsed()">
           @if (collapsed()) {
-            <span class="grid h-10 w-10 place-items-center rounded-xl bg-gradient-primary text-sm font-extrabold text-primary-foreground shadow-soft">CC</span>
-          } @else {
+          <div class="w-10 overflow-hidden" title="Clinic Copilot" aria-label="Clinic Copilot">
             <app-logo [dark]="true" />
-          }
-        </div>
+          </div>
+        } @else {
+          <app-logo [dark]="true" />
+        }
+                </div>
 
         <!-- Navigation -->
         <nav class="mt-2 flex-1 overflow-y-auto px-3 pb-4" [attr.aria-label]="'Navigation ' + label()">
