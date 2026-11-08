@@ -21,6 +21,28 @@ public class PatientProfileService {
     }
 
     @Transactional
+    public PatientProfileResponse upsertProfile(
+        UUID userId, PatientProfileRequest request
+    ) {
+        PatientProfile profile = patientProfileRepository.findByUserId(userId)
+                .orElseGet(() -> {
+                        PatientProfile created = new PatientProfile();
+                        created.setUserId(userId);
+                        return created;
+                });
+
+        if (request.phoneNumber() != null) {
+                profile.setPhoneNumber(request.phoneNumber());
+        }
+
+        if (request.address() != null) {
+                profile.setAddress(request.address());
+        }
+
+        return mapToResponse(patientProfileRepository.save(profile));
+    }
+
+    @Transactional
     public PatientProfileResponse createProfile(
             UUID userId, PatientProfileRequest request) {
 
