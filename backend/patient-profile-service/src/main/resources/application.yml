@@ -17,7 +17,7 @@ app:
   security:
     jwt:
       secret: ${JWT_SECRET}
-      roles_claim: ${JWT_ROLES_CLAIM:role}
+      roles-claim: ${JWT_ROLES_CLAIM:role}
 
 management:
   endpoints:

@@ -3,6 +3,7 @@ package com.clinic.patient_profile.service;
 import com.clinic.patient_profile.dto.PatientProfileRequest;
 import com.clinic.patient_profile.dto.PatientProfileResponse;
 import com.clinic.patient_profile.entity.PatientProfile;
+import com.clinic.patient_profile.exception.PatientProfileNotFoundException;
 import com.clinic.patient_profile.repository.PatientProfileRepository;
 
 import org.springframework.stereotype.Service;
@@ -20,93 +21,53 @@ public class PatientProfileService {
         this.patientProfileRepository = patientProfileRepository;
     }
 
+    // Creates the profile on the first call and updates it afterwards. Only the
+    // fields present in the request are changed. Two simultaneous first calls hit
+    // the unique constraint on user_id; the handler turns that into a 409.
     @Transactional
     public PatientProfileResponse upsertProfile(
-        UUID userId, PatientProfileRequest request
-    ) {
+            UUID userId, PatientProfileRequest request) {
+
         PatientProfile profile = patientProfileRepository.findByUserId(userId)
                 .orElseGet(() -> {
-                        PatientProfile created = new PatientProfile();
-                        created.setUserId(userId);
-                        return created;
+                    PatientProfile created = new PatientProfile();
+                    created.setUserId(userId);
+                    return created;
                 });
 
         if (request.phoneNumber() != null) {
-                profile.setPhoneNumber(request.phoneNumber());
+            profile.setPhoneNumber(request.phoneNumber());
         }
-
         if (request.address() != null) {
-                profile.setAddress(request.address());
+            profile.setAddress(request.address());
         }
 
         return mapToResponse(patientProfileRepository.save(profile));
-    }
-
-    @Transactional
-    public PatientProfileResponse createProfile(
-            UUID userId, PatientProfileRequest request) {
-
-        if (patientProfileRepository.existsByUserId(userId)) {
-            throw new IllegalArgumentException(
-                    "A patient profile already exists for this user."
-            );
-        }
-
-        PatientProfile profile = new PatientProfile();
-
-        profile.setUserId(userId);
-        profile.setPhoneNumber(request.phoneNumber());
-        profile.setAddress(request.address());
-
-        PatientProfile savedProfile = patientProfileRepository.save(profile);
-
-        return mapToResponse(savedProfile);
     }
 
     @Transactional(readOnly = true)
     public PatientProfileResponse getProfileByUserId(UUID userId) {
-
-        PatientProfile profile = patientProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Patient profile not found for user: " + userId
-                ));
-
-        return mapToResponse(profile);
-    }
-
-    @Transactional
-    public PatientProfileResponse updateProfile(
-            UUID userId, PatientProfileRequest request) {
-
-        PatientProfile profile = patientProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Patient profile not found for user: " + userId
-                ));
-
-        profile.setPhoneNumber(request.phoneNumber());
-        profile.setAddress(request.address());
-
-        return mapToResponse(patientProfileRepository.save(profile));
+        return mapToResponse(findOrThrow(userId));
     }
 
     @Transactional
     public void deleteProfile(UUID userId) {
-
-        PatientProfile profile = patientProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Patient profile not found for user: " + userId
-                ));
-
-        patientProfileRepository.delete(profile);
+        patientProfileRepository.delete(findOrThrow(userId));
     }
 
+    private PatientProfile findOrThrow(UUID userId) {
+        return patientProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new PatientProfileNotFoundException(
+                        "Patient profile not found for user: " + userId
+                ));
+    }
 
     private PatientProfileResponse mapToResponse(PatientProfile profile) {
-    return new PatientProfileResponse(
-        profile.getPatientId(),
-        profile.getUserId(),
-        profile.getPhoneNumber(),
-        profile.getAddress()
-    );
-}
+        return new PatientProfileResponse(
+            profile.getPatientId(),
+            profile.getUserId(),
+            profile.getPhoneNumber(),
+            profile.getAddress()
+        );
+    }
 }
