@@ -99,6 +99,7 @@ services:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_URL: jdbc:postgresql://postgres:5432/clinic_identity
+      JWT_SECRET: ${JWT_SECRET}
       JAVA_TOOL_OPTIONS: -Xmx256m
 
   patient-profile-service:
