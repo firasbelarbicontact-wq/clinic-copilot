@@ -16,9 +16,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
 
 @Service
 public class SlotGenerationService {
@@ -46,17 +45,15 @@ public class SlotGenerationService {
             LocalDate date,
             String status) {
 
-        if (doctorId == null || date == null) {
-            throw new IllegalArgumentException(
-                    "doctorId and date are required");
-        }
+        validateInput(doctorId, date);
 
         TimeSlot.SlotStatus requestedStatus = null;
 
         if (status != null && !status.isBlank()) {
             try {
                 requestedStatus = TimeSlot.SlotStatus.valueOf(
-                        status.trim().toUpperCase());
+                        status.trim().toUpperCase(Locale.ROOT));
+
             } catch (IllegalArgumentException exception) {
                 throw new IllegalArgumentException(
                         "Unsupported slot status: " + status,
@@ -64,13 +61,18 @@ public class SlotGenerationService {
             }
         }
 
-        LocalDateTime from = date.atStartOfDay();
-        LocalDateTime to = date.plusDays(1).atStartOfDay().minusNanos(1);
+        LocalDateTime dayStart = date.atStartOfDay();
+        LocalDateTime dayEnd = date.plusDays(1)
+                .atStartOfDay()
+                .minusNanos(1);
 
         final TimeSlot.SlotStatus finalStatus = requestedStatus;
 
         return timeSlotRepository
-                .findByDoctorIdAndStartTimeBetweenOrderByStartTimeAsc(doctorId, from, to)
+                .findByDoctorIdAndStartTimeBetweenOrderByStartTimeAsc(
+                        doctorId,
+                        dayStart,
+                        dayEnd)
                 .stream()
                 .filter(slot -> finalStatus == null
                         || slot.getStatus() == finalStatus)
@@ -85,21 +87,17 @@ public class SlotGenerationService {
     public void generateSlotsForDoctor(Long doctorId, LocalDate date) {
 
         // 1. Validate input
-        if (doctorId == null || date == null) {
-            throw new IllegalArgumentException(
-                    "doctorId and date are required");
-        }
+        validateInput(doctorId, date);
 
-        // 2. Check whether the doctor has an availability exception
+        // 2. Check availability exceptions for this date
         List<AvailabilityException> exceptions =
-                availabilityExceptionRepository.findByDoctorId(doctorId);
+                availabilityExceptionRepository
+                        .findByDoctorIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+                                doctorId,
+                                date,
+                                date);
 
-        boolean unavailable = exceptions.stream().anyMatch(exception ->
-                !date.isBefore(exception.getStartDate())
-                        && !date.isAfter(exception.getEndDate())
-        );
-
-        if (unavailable) {
+        if (!exceptions.isEmpty()) {
             return;
         }
 
@@ -111,7 +109,7 @@ public class SlotGenerationService {
             return;
         }
 
-        // 4. Find schedules matching the requested day
+        // 4. Keep schedules matching the requested day
         List<DoctorSchedule> dailySchedules = schedules.stream()
                 .filter(schedule ->
                         schedule.getDayOfWeek() == date.getDayOfWeek())
@@ -121,76 +119,159 @@ public class SlotGenerationService {
             return;
         }
 
-        // 5. Retrieve existing slots for this date
+        // 5. Retrieve existing slots for the requested date
         LocalDateTime dayStart = date.atStartOfDay();
+
         LocalDateTime dayEnd = date.plusDays(1)
                 .atStartOfDay()
                 .minusNanos(1);
 
         List<TimeSlot> existingSlots =
-                timeSlotRepository.findByDoctorIdAndStartTimeBetweenOrderByStartTimeAsc(
-                        doctorId,
-                        dayStart,
-                        dayEnd
-                );
+                timeSlotRepository
+                        .findByDoctorIdAndStartTimeBetweenOrderByStartTimeAsc(
+                                doctorId,
+                                dayStart,
+                                dayEnd);
 
-        // Keep existing start times to avoid duplicates.
-        Set<LocalDateTime> existingStartTimes = new HashSet<>();
+        /*
+         * Keep all existing and newly generated slots together.
+         * This allows us to detect overlaps both with the database
+         * and between schedules processed in this same operation.
+         */
+        List<TimeSlot> allSlots = new ArrayList<>(existingSlots);
 
-        for (TimeSlot slot : existingSlots) {
-            existingStartTimes.add(slot.getStartTime());
-        }
-
-        // 6. Generate missing slots
         List<TimeSlot> slotsToSave = new ArrayList<>();
 
+        // 6. Generate slots for every active daily schedule
         for (DoctorSchedule schedule : dailySchedules) {
+
+            validateSchedule(schedule);
 
             LocalTime start = schedule.getStartTime();
             LocalTime end = schedule.getEndTime();
-            Integer duration = schedule.getSlotDurationMinutes();
 
-            // Validate schedule configuration
-            if (start == null || end == null
-                    || duration == null || duration <= 0
-                    || !end.isAfter(start)) {
-
-                throw new IllegalStateException(
-                        "Invalid schedule configuration. Schedule ID: "
-                                + schedule.getId());
-            }
+            int duration = schedule.getSlotDurationMinutes();
 
             LocalDateTime currentStart = date.atTime(start);
             LocalDateTime scheduleEnd = date.atTime(end);
 
-            // Generate slots until the remaining time is insufficient.
+            // Generate slots while the complete duration fits.
             while (!currentStart.plusMinutes(duration)
                     .isAfter(scheduleEnd)) {
 
                 LocalDateTime currentEnd =
                         currentStart.plusMinutes(duration);
 
-                // Avoid duplicate start times, including overlapping schedules.
-                if (existingStartTimes.add(currentStart)) {
+                TimeSlot candidate = new TimeSlot();
 
-                    TimeSlot slot = new TimeSlot();
+                candidate.setDoctorId(doctorId);
+                candidate.setScheduleId(schedule.getId());
+                candidate.setStartTime(currentStart);
+                candidate.setEndTime(currentEnd);
+                candidate.setStatus(TimeSlot.SlotStatus.FREE);
 
-                    slot.setDoctorId(doctorId);
-                    slot.setScheduleId(schedule.getId());
-                    slot.setStartTime(currentStart);
-                    slot.setEndTime(currentEnd);
-                    slot.setStatus(TimeSlot.SlotStatus.FREE);
+                boolean exactDuplicate = false;
 
-                    slotsToSave.add(slot);
+                // 7. Check candidate against every existing/generated slot
+                for (TimeSlot existing : allSlots) {
+
+                    if (overlaps(
+                            candidate.getStartTime(),
+                            candidate.getEndTime(),
+                            existing.getStartTime(),
+                            existing.getEndTime())) {
+
+                        // An identical slot already exists: skip it.
+                        if (candidate.getStartTime().equals(existing.getStartTime())
+                                && candidate.getEndTime().equals(existing.getEndTime())) {
+
+                            exactDuplicate = true;
+
+                        } else {
+
+                            // Different intervals overlap: reject the schedule.
+                            throw new IllegalStateException(
+                                    "Overlapping time slots detected for doctor "
+                                            + doctorId
+                                            + ". Existing interval: "
+                                            + existing.getStartTime()
+                                            + " - "
+                                            + existing.getEndTime()
+                                            + ", candidate interval: "
+                                            + candidate.getStartTime()
+                                            + " - "
+                                            + candidate.getEndTime());
+                        }
+                    }
+                }
+
+                // 8. Add only missing, non-overlapping slots
+                if (!exactDuplicate) {
+                    allSlots.add(candidate);
+                    slotsToSave.add(candidate);
                 }
 
                 currentStart = currentEnd;
             }
         }
 
-        // 7. Save generated slots in one operation
+        // 9. Save all generated slots in one operation
         if (!slotsToSave.isEmpty()) {
             timeSlotRepository.saveAll(slotsToSave);
+        }
+    }
+
+    /**
+     * Checks whether two time intervals overlap.
+     *
+     * Adjacent intervals are allowed:
+     * 09:00-09:30 and 09:30-10:00.
+     */
+    private boolean overlaps(
+            LocalDateTime start1,
+            LocalDateTime end1,
+            LocalDateTime start2,
+            LocalDateTime end2) {
+
+        if (start1 == null || end1 == null
+                || start2 == null || end2 == null) {
+
+            throw new IllegalStateException(
+                    "A time slot contains a null start or end time");
+        }
+
+        return start1.isBefore(end2)
+                && end1.isAfter(start2);
+    }
+
+    /**
+     * Validates the doctor's schedule configuration.
+     */
+    private void validateSchedule(DoctorSchedule schedule) {
+
+        if (schedule == null
+                || schedule.getId() == null
+                || schedule.getDayOfWeek() == null
+                || schedule.getStartTime() == null
+                || schedule.getEndTime() == null
+                || schedule.getSlotDurationMinutes() == null
+                || schedule.getSlotDurationMinutes() <= 0
+                || !schedule.getEndTime().isAfter(schedule.getStartTime())) {
+
+            throw new IllegalStateException(
+                    "Invalid doctor schedule configuration. Schedule ID: "
+                            + (schedule == null ? "null" : schedule.getId()));
+        }
+    }
+
+    /**
+     * Validates the request parameters.
+     */
+    private void validateInput(Long doctorId, LocalDate date) {
+
+        if (doctorId == null || doctorId <= 0 || date == null) {
+            throw new IllegalArgumentException(
+                    "A valid doctorId and date are required");
         }
     }
 

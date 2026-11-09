@@ -30,9 +30,9 @@ spring:
 # --- Feign client URLs ---
 services:
   identity-profile:
-    url: http://localhost:8081
+    url: ${IDENTITY_PROFILE_URL:http://localhost:8081}
   doctor-directory:
-    url: http://localhost:8082
+    url: ${DOCTOR_DIRECTORY_URL:http://localhost:8082}
 
 # --- RabbitMQ configuration ---
 app:
