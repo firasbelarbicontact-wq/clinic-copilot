@@ -1,13 +1,16 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { LucideAward, LucideLanguages, LucideMapPin } from '@lucide/angular';
 import { Icon } from '../../shared/ui/icon';
 import { PublicDoctorSummary } from './models/doctor.models';
-
+import { switchMap } from 'rxjs';
+import { ReviewsService } from '../reviews/reviews.service';
+import { StarRating } from '../reviews/star-rating';
 @Component({
   selector: 'app-doctor-card',
-  imports: [RouterLink, Icon, DecimalPipe],
+  imports: [RouterLink, Icon, DecimalPipe, StarRating],
   template: `
     <article class="card-lift flex h-full flex-col rounded-2xl border border-border bg-card p-5 shadow-soft">
       <div class="flex items-start gap-4">
@@ -24,7 +27,17 @@ import { PublicDoctorSummary } from './models/doctor.models';
           <span class="shrink-0 rounded-full bg-deep px-2.5 py-1 text-xs font-semibold text-deep-foreground">{{ doctor().distanceKm | number: '1.0-1' }} km</span>
         }
       </div>
-
+      <div class="mt-3 flex items-center gap-2 text-sm">
+        @if (rating(); as r) {
+          @if (r.count > 0) {
+            <app-stars [value]="r.average" />
+            <span class="font-semibold text-deep">{{ r.average | number: '1.1-1' }}</span>
+            <span class="text-muted-foreground">({{ r.count }} avis)</span>
+          } @else {
+            <span class="text-muted-foreground">Pas encore d'avis</span>
+          }
+        }
+      </div>
       <ul class="mt-4 space-y-2 text-sm text-muted-foreground">
         @if (place()) {
           <li class="flex items-center gap-2"><app-icon [icon]="MapPin" [size]="16" />{{ place() }}</li>
@@ -51,6 +64,12 @@ import { PublicDoctorSummary } from './models/doctor.models';
 })
 export class DoctorCard {
   readonly doctor = input.required<PublicDoctorSummary>();
+
+  private readonly reviews = inject(ReviewsService);
+  protected readonly rating = toSignal(
+    toObservable(this.doctor).pipe(switchMap((d) => this.reviews.getRating(d.id))),
+    { initialValue: null },
+  );
 
   protected readonly MapPin = LucideMapPin;
   protected readonly Award = LucideAward;

@@ -5,15 +5,18 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -44,16 +47,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = header.substring(7);
 
         try {
-            String email = jwtService.extractUsername(token);
+            // Verifies signature and expiration; throws if the token is not valid.
+            Claims claims = jwtService.parse(token);
 
-            if (email != null &&
+            if (claims.getSubject() != null &&
                     SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                UserDetails userDetails =
-                        userDetailsService.loadUserByUsername(email);
+                UUID userId = UUID.fromString(claims.getSubject());
 
-                if (userDetails.isEnabled() &&
-                        jwtService.isTokenValid(token, userDetails)) {
+                // Identity owns the accounts, so it re-checks the database on every
+                // request: a deactivated or deleted account loses access immediately,
+                // and the role used is the current one, not the one in the token.
+                UserDetails userDetails =
+                        userDetailsService.loadUserById(userId);
+
+                if (userDetails.isEnabled()) {
 
                     var authentication =
                             new UsernamePasswordAuthenticationToken(
@@ -72,7 +80,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
 
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (JwtException | IllegalArgumentException | UsernameNotFoundException e) {
             SecurityContextHolder.clearContext();
         }
 

@@ -10,7 +10,7 @@ Plateforme d'aide à l'orientation médicale : décrire ses symptômes, recevoir
 |---|---|
 | Web | Angular + TypeScript |
 | Mobile | Kotlin + Jetpack Compose (Android) |
-| Backend | Java 21 + Spring Boot (11 microservices) |
+| Backend | Java 25 + Spring Boot (11 microservices) |
 | Gateway | Spring Cloud Gateway |
 | Base de données | PostgreSQL 16 (une base par service) |
 | Messagerie | RabbitMQ |
@@ -51,7 +51,7 @@ Installer :
 |---|---|---|
 | Git | dernière | `git --version` |
 | Docker Desktop | dernière | `docker --version` |
-| JDK (si vous développez le backend hors Docker) | 21 | `java -version` |
+| JDK (si vous développez le backend hors Docker) | 25 | `java -version` |
 | Node.js (si vous développez le frontend hors Docker) | 22 LTS | `node -v` |
 | Android Studio (pour le mobile) | dernière | |
 
@@ -305,3 +305,4 @@ Projet réalisé dans le cadre de la formation DSI 32.
 | Nom | Rôle |
 |---|---|
 | À compléter | À compléter |
+

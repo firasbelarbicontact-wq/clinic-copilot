@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: ${SERVER_PORT:8082}
 
 spring:
   application:
@@ -31,8 +31,7 @@ management:
 app:
   security:
     jwt:
-      # Clé HS256 partagée avec Identity (M1). À remplacer quand M1 a choisi son mode de signature.
-      secret: ${JWT_SECRET:dev-only-secret-change-me-0123456789}
+      secret: ${JWT_SECRET}
       roles-claim: ${JWT_ROLES_CLAIM:role}
   storage:
     diplomas-dir: ${DIPLOMAS_DIR:./data/diplomas}
