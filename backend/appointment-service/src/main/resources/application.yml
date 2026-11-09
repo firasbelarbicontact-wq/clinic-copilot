@@ -1,34 +1,31 @@
 server:
-  port: 8084
+  port: ${SERVER_PORT:8084}
 
 spring:
   application:
     name: appointment-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/clinic_appointment_db
-    username: postgres
-    password: postgres
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/clinic_appointments}
+    username: ${DB_USER:clinic}
+    password: ${DB_PASSWORD:secret}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
       ddl-auto: validate
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-    show-sql: true
+    open-in-view: false
+    show-sql: false
 
   flyway:
     enabled: true
     locations: classpath:db
 
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
 
 # --- Feign client URLs ---
 services:
@@ -56,8 +53,7 @@ app:
 # --- JWT ---
 security:
   jwt:
-    secret: ${JWT_SECRET:Y2xpbmljLWNvcGlsb3Qtc2VjcmV0LWtleS1mb3ItZGV2ZWxvcG1lbnQtMTIzNDU2Nzg5MA==}
-    expiration: 86400000
+    secret: ${JWT_SECRET}
 
 # --- OpenAPI ---
 springdoc:
@@ -68,4 +64,4 @@ springdoc:
 
 logging:
   level:
-    com.clinic.appointment_service: DEBUG
+    com.clinic.appointment_service: INFO

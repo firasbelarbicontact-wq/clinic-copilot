@@ -138,6 +138,7 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/clinic_appointments
       IDENTITY_PROFILE_URL: http://identity-profile-service:8081
       DOCTOR_DIRECTORY_URL: http://doctor-directory-service:8082
+      JWT_SECRET: ${JWT_SECRET}
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER:-guest}
