@@ -43,8 +43,7 @@ public class AuthService {
         user.setFirstName(request.firstName());
         user.setLastName(request.lastName());
         user.setEmail(request.email());
-        Role assignedRole = (request.role() == Role.DOCTOR) ? Role.DOCTOR : Role.PATIENT;
-        user.setRole(assignedRole);
+        user.setRole(role);
         user.setIsActive(true);
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setDateOfBirth(request.dateOfBirth());

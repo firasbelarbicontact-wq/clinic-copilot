@@ -9,69 +9,70 @@ spring:
       server:
         webmvc:
           routes:
-            # ---- reviews (must come BEFORE doctor-directory) ----
+            # first match wins: specific routes first
             - id: reviews-doctor-reviews
-              uri: ${REVIEWS_URL:http://reviews-feedback-service:8088}
+              uri: ${REVIEWS_SERVICE_URL:http://localhost:8088}
               predicates:
                 - Path=/api/doctors/{id}/reviews
             - id: reviews-doctor-rating
-              uri: ${REVIEWS_URL:http://reviews-feedback-service:8088}
+              uri: ${REVIEWS_SERVICE_URL:http://localhost:8088}
               predicates:
                 - Path=/api/doctors/{id}/rating
             - id: reviews-admin
-              uri: ${REVIEWS_URL:http://reviews-feedback-service:8088}
+              uri: ${REVIEWS_SERVICE_URL:http://localhost:8088}
               predicates:
                 - Path=/api/admin/reviews/**
             - id: reviews
-              uri: ${REVIEWS_URL:http://reviews-feedback-service:8088}
+              uri: ${REVIEWS_SERVICE_URL:http://localhost:8088}
               predicates:
                 - Path=/api/reviews/**
 
-            # ---- identity ----
+            - id: admin-audit
+              uri: ${ADMIN_AUDIT_URL:http://localhost:8089}
+              predicates:
+                - Path=/api/admin/audit/**
+
             - id: identity-auth
-              uri: ${IDENTITY_URL:http://identity-profile-service:8081}
+              uri: ${IDENTITY_SERVICE_URL:http://localhost:8081}
               predicates:
                 - Path=/api/auth/**
             - id: identity-users
-              uri: ${IDENTITY_URL:http://identity-profile-service:8081}
+              uri: ${IDENTITY_SERVICE_URL:http://localhost:8081}
               predicates:
                 - Path=/api/users/**
 
-            # ---- patient profile ----
             - id: patient-profiles
-              uri: ${PATIENT_URL:http://patient-profile-service:8090}
+              uri: ${PATIENT_PROFILE_URL:http://localhost:8090}
               predicates:
                 - Path=/api/patient-profiles/**
 
-            # ---- appointments ----
             - id: appointments
-              uri: ${APPOINTMENT_URL:http://appointment-service:8084}
+              uri: ${APPOINTMENT_SERVICE_URL:http://localhost:8084}
               predicates:
                 - Path=/api/appointments/**
             - id: availability
-              uri: ${APPOINTMENT_URL:http://appointment-service:8084}
+              uri: ${APPOINTMENT_SERVICE_URL:http://localhost:8084}
               predicates:
                 - Path=/api/availability/**
 
-            # ---- doctor directory (catch-alls for /api/doctors and /api/admin) ----
             - id: doctor-directory-public
-              uri: ${DOCTOR_URL:http://doctor-directory-service:8082}
+              uri: ${DOCTOR_DIRECTORY_URL:http://localhost:8082}
               predicates:
                 - Path=/api/directory/**
             - id: doctor-directory-specialties
-              uri: ${DOCTOR_URL:http://doctor-directory-service:8082}
+              uri: ${DOCTOR_DIRECTORY_URL:http://localhost:8082}
               predicates:
                 - Path=/api/specialties/**
             - id: doctor-directory-languages
-              uri: ${DOCTOR_URL:http://doctor-directory-service:8082}
+              uri: ${DOCTOR_DIRECTORY_URL:http://localhost:8082}
               predicates:
                 - Path=/api/languages/**
             - id: doctor-directory-doctors
-              uri: ${DOCTOR_URL:http://doctor-directory-service:8082}
+              uri: ${DOCTOR_DIRECTORY_URL:http://localhost:8082}
               predicates:
                 - Path=/api/doctors/**
             - id: doctor-directory-admin
-              uri: ${DOCTOR_URL:http://doctor-directory-service:8082}
+              uri: ${DOCTOR_DIRECTORY_URL:http://localhost:8082}
               predicates:
                 - Path=/api/admin/**
 
