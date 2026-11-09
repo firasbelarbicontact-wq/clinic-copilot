@@ -5,6 +5,16 @@ import { API_BASE_URL } from '../../core/api.config';
 
 export type Verification = 'PENDING' | 'VERIFIED' | 'REJECTED';
 export type Professional = 'ACTIVE' | 'ON_LEAVE' | 'INACTIVE' | 'SUSPENDED';
+export type AuditKind = 'AUTH' | 'DOCTOR' | 'REVIEW' | 'USER';
+
+export interface AuditEntry {
+  id: string;
+  at: string;
+  actor: string;
+  kind: AuditKind;
+  action: string;
+  target: string;
+}
 
 export interface AdminDoctorSummary {
   id: string;
@@ -68,5 +78,9 @@ export class AdminService {
 
   file(diplomaId: string): Observable<Blob> {
     return this.http.get(`${this.base}/diplomas/${diplomaId}/file`, { responseType: 'blob' });
+  }
+
+  audit(): Observable<AuditEntry[]> {
+    return this.http.get<AuditEntry[]>(`${this.base}/audit`);
   }
 }

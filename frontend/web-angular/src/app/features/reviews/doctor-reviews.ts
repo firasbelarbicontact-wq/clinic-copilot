@@ -40,7 +40,7 @@ function readRole(): string | null {
                   <span class="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                     <span class="block h-full rounded-full bg-amber-400" [style.width.%]="pct(star)"></span>
                   </span>
-                  <span class="w-6 shrink-0 text-right text-muted-foreground">{{ s.distribution[star] ?? 0 }}</span>
+                  <span class="w-6 shrink-0 text-right text-muted-foreground">{{ s.distribution[star] }}</span>
                 </li>
               }
             </ul>
