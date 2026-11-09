@@ -75,10 +75,10 @@ services:
       PATIENT_PROFILE_URL: http://patient-profile-service:8090
       APPOINTMENT_SERVICE_URL: http://appointment-service:8084
       REVIEWS_SERVICE_URL: http://reviews-feedback-service:8088
+      ADMIN_AUDIT_URL: http://admin-audit-service:8089
       JAVA_TOOL_OPTIONS: -Xmx256m
     ports:
       - "8080:8080"
-      - "8090:8080"
 
   # -------------------------
   # ANGULAR FRONTEND
@@ -196,12 +196,10 @@ services:
     build: ../backend/admin-audit-service
     image: ${DOCKERHUB_USER:-clinic}/clinic-admin-audit-service:1.0
     environment:
-      IDENTITY_SERVICE_URL: http://identity-profile-service:8081
-      DOCTOR_DIRECTORY_URL: http://doctor-directory-service:8082
-      PATIENT_PROFILE_URL: http://patient-profile-service:8090
-      APPOINTMENT_SERVICE_URL: http://appointment-service:8084
-      REVIEWS_SERVICE_URL: http://reviews-feedback-service:8088
-      ADMIN_AUDIT_URL: http://admin-audit-service:8089
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_URL: jdbc:postgresql://postgres:5432/clinic_admin
+      JWT_SECRET: ${JWT_SECRET}
       JAVA_TOOL_OPTIONS: -Xmx256m
     ports:
       - "8080:8080"
