@@ -22,7 +22,6 @@ public class SecurityConfiguration {
     }
 
     @Bean
-
     public SecurityFilterChain seecurityFilterChain(
         HttpSecurity http,
         OncePerRequestFilter jwtAuthenticationFilter
@@ -30,9 +29,11 @@ public class SecurityConfiguration {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/register",
+                .requestMatchers(
+                    "/api/auth/register",
                     "/api/auth/login",
-                    "/error"
+                    "/error",
+                    "/actuator/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

@@ -36,9 +36,12 @@ public class GlobalExceptionHandler {
     }
 
     // 403 - the account exists but is deactivated
-    @ExceptionHandler(AccountDisabledException.class)
+    @ExceptionHandler({
+        AccountDisabledException.class,
+        RoleNotAllowedException.class
+    })
     public ResponseEntity<ErrorResponse> handleForbidden(
-            AccountDisabledException ex, HttpServletRequest request) {
+            RuntimeException ex, HttpServletRequest request) {
         return build(HttpStatus.FORBIDDEN, ex.getMessage(), request, Map.of());
     }
 

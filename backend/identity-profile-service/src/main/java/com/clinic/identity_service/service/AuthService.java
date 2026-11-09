@@ -10,6 +10,7 @@ import com.clinic.identity_service.entity.User;
 import com.clinic.identity_service.exception.AccountDisabledException;
 import com.clinic.identity_service.exception.ExistedByMailException;
 import com.clinic.identity_service.exception.InvalidCredentialsException;
+import com.clinic.identity_service.exception.RoleNotAllowedException;
 import com.clinic.identity_service.repository.UserRepository;
 
 @Service
@@ -29,13 +30,21 @@ public class AuthService {
                 "User with this email already exists."
             );
         }
+                Role role = request.role() == null ? Role.PATIENT : request.role();
+
+        // Anyone can sign up, but only as a patient or a doctor.
+        // ADMIN accounts are created by AdminBootstrap or by another admin.
+        if (role == Role.ADMIN) {
+            throw new RoleNotAllowedException("This role cannot be chosen at registration.");
+        }
 
         User user = new User();
 
         user.setFirstName(request.firstName());
         user.setLastName(request.lastName());
         user.setEmail(request.email());
-        user.setRole(Role.PATIENT);
+        Role assignedRole = (request.role() == Role.DOCTOR) ? Role.DOCTOR : Role.PATIENT;
+        user.setRole(assignedRole);
         user.setIsActive(true);
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setDateOfBirth(request.dateOfBirth());

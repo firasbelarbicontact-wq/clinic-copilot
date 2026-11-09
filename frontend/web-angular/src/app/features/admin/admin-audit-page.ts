@@ -1,14 +1,14 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideDownload, LucideHistory, LucideSearch } from '@lucide/angular';
 import { dayHeading, timeLabel } from '../../core/mock/format';
 import { Icon } from '../../shared/ui/icon';
 import { PageHeader } from '../../shared/ui/page-header';
-import { AdminDemoStore, AuditEntry, AuditKind } from './admin-demo.store';
+import { AdminService, AuditEntry } from './admin.service';
 
-type KindTab = 'ALL' | AuditKind;
+type KindTab = 'ALL' | AuditEntry['kind'];
 
-const KINDS: Record<AuditKind, { label: string; dot: string; chip: string }> = {
+const KINDS: Record<AuditEntry['kind'], { label: string; dot: string; chip: string }> = {
   AUTH: { label: 'Connexion', dot: 'bg-info', chip: 'bg-info/15 text-info' },
   DOCTOR: { label: 'Médecin', dot: 'bg-primary', chip: 'bg-primary/12 text-primary' },
   REVIEW: { label: 'Avis', dot: 'bg-amber-400', chip: 'bg-warning/20 text-accent-foreground' },
@@ -23,7 +23,7 @@ const KINDS: Record<AuditKind, { label: string; dot: string; chip: string }> = {
       <div class="mx-auto max-w-4xl space-y-6">
         <app-page-header eyebrow="Supervision" title="Journal d'audit" subtitle="Qui a fait quoi, et quand." [icon]="History">
           <div class="flex flex-wrap items-center gap-2">
-            <span class="rounded-full bg-warning/20 px-3 py-1 text-xs font-semibold text-accent-foreground">Données de démonstration</span>
+            <span class="rounded-full bg-warning/20 px-3 py-1 text-xs font-semibold text-accent-foreground">Données en direct</span>
             <button type="button" class="btn btn-soft" (click)="exportCsv()"><app-icon [icon]="Download" [size]="16" />Exporter en CSV</button>
           </div>
         </app-page-header>
@@ -65,15 +65,20 @@ const KINDS: Record<AuditKind, { label: string; dot: string; chip: string }> = {
           </section>
         } @empty {
           <div class="rounded-2xl border border-border bg-card p-10 text-center shadow-soft">
-            <p class="font-semibold text-deep">Aucune entrée dans cette vue</p>
+            <p class="font-semibold text-deep">Aucune donnée disponible</p>
           </div>
         }
       </div>
     </div>
   `,
 })
-export class AdminAuditPage {
-  private readonly store = inject(AdminDemoStore);
+export class AdminAuditPage implements OnInit {
+  private readonly adminService = inject(AdminService);
+  private readonly auditData = signal<AuditEntry[]>([]);
+
+  ngOnInit() {
+    this.adminService.audit().subscribe((data) => this.auditData.set(data));
+  }
 
   protected readonly Download = LucideDownload;
   protected readonly History = LucideHistory;
@@ -83,10 +88,10 @@ export class AdminAuditPage {
 
   protected readonly tabs: { id: KindTab; label: string }[] = [
     { id: 'ALL', label: 'Tout' },
-    { id: 'DOCTOR', label: 'Médecins' },
+    { id: 'DOCTOR', label: 'Médecin' },
     { id: 'REVIEW', label: 'Avis' },
-    { id: 'USER', label: 'Comptes' },
-    { id: 'AUTH', label: 'Connexions' },
+    { id: 'USER', label: 'Compte' },
+    { id: 'AUTH', label: 'Connexion' },
   ];
   protected readonly tab = signal<KindTab>('ALL');
   protected readonly query = signal('');
@@ -94,8 +99,7 @@ export class AdminAuditPage {
   protected readonly rows = computed(() => {
     const q = this.query().trim().toLowerCase();
     const tab = this.tab();
-    return this.store
-      .audit()
+    return this.auditData()
       .filter((e) => tab === 'ALL' || e.kind === tab)
       .filter((e) => !q || `${e.action} ${e.target} ${e.actor}`.toLowerCase().includes(q))
       .sort((a, b) => b.at.localeCompare(a.at));
@@ -115,7 +119,9 @@ export class AdminAuditPage {
   protected exportCsv() {
     const header = ['Date', 'Acteur', 'Type', 'Action', 'Cible'];
     const lines = this.rows().map((e) => [e.at, e.actor, KINDS[e.kind].label, e.action, e.target]);
-    const csv = [header, ...lines].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\n');
+    const csv = [header, ...lines]
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';'))
+      .join('\n');
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
