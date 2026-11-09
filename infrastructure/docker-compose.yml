@@ -202,7 +202,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JAVA_TOOL_OPTIONS: -Xmx256m
     ports:
-      - "8080:8080"
+      - "8089:8089"
 
   # -------------------------
   # EXPRESS CHAT SERVICE
