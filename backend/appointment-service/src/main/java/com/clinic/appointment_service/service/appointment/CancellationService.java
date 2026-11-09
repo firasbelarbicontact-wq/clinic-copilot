@@ -7,6 +7,7 @@ import com.clinic.appointment_service.entity.TimeSlot;
 import com.clinic.appointment_service.repository.AppointmentRepository;
 import com.clinic.appointment_service.repository.TimeSlotRepository;
 import com.clinic.appointment_service.service.event.AppointmentEventPublisher;
+import com.clinic.appointment_service.service.event.TransactionAfterCommit;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +52,8 @@ public class CancellationService {
 
         // 3. Verify appointment status
         if (appointment.getStatus() != Appointment.AppointmentStatus.BOOKED
-                && appointment.getStatus() != Appointment.AppointmentStatus.RESCHEDULED) {
+                && appointment.getStatus()
+                        != Appointment.AppointmentStatus.RESCHEDULED) {
             throw new IllegalStateException(
                     "Cannot cancel an appointment with status: "
                             + appointment.getStatus());
@@ -95,10 +97,12 @@ public class CancellationService {
         timeSlotRepository.save(slot);
         Appointment saved = appointmentRepository.save(appointment);
 
-        // 9. Publish cancellation event
-        eventPublisher.publishCancelled(
-                saved.getId(),
-                saved.getReason()
+        // 9. Publish cancellation event only after transaction commit
+        TransactionAfterCommit.execute(() ->
+                eventPublisher.publishCancelled(
+                        saved.getId(),
+                        saved.getReason()
+                )
         );
 
         return toDto(saved);

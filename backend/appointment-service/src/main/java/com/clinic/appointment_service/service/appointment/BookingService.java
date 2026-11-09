@@ -8,6 +8,7 @@ import com.clinic.appointment_service.entity.TimeSlot;
 import com.clinic.appointment_service.repository.AppointmentRepository;
 import com.clinic.appointment_service.repository.TimeSlotRepository;
 import com.clinic.appointment_service.service.event.AppointmentEventPublisher;
+import com.clinic.appointment_service.service.event.TransactionAfterCommit;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,12 +95,14 @@ public class BookingService {
 
         Appointment saved = appointmentRepository.save(appointment);
 
-        // Publish booking event.
-        eventPublisher.publishBooked(
-                saved.getId(),
-                saved.getPatientId(),
-                saved.getDoctorId(),
-                saved.getStartTime().toString()
+        // Publish booking event only after the transaction commits.
+        TransactionAfterCommit.execute(() ->
+                eventPublisher.publishBooked(
+                        saved.getId(),
+                        saved.getPatientId(),
+                        saved.getDoctorId(),
+                        saved.getStartTime().toString()
+                )
         );
 
         return toDto(saved);
@@ -109,7 +112,8 @@ public class BookingService {
     public AppointmentResponseDTO getById(Long id) {
 
         if (id == null || id <= 0) {
-            throw new IllegalArgumentException("A valid appointment ID is required");
+            throw new IllegalArgumentException(
+                    "A valid appointment ID is required");
         }
 
         Appointment appointment = appointmentRepository.findById(id)
@@ -123,7 +127,8 @@ public class BookingService {
     public List<AppointmentResponseDTO> getByPatient(Long patientId) {
 
         if (patientId == null || patientId <= 0) {
-            throw new IllegalArgumentException("A valid patient ID is required");
+            throw new IllegalArgumentException(
+                    "A valid patient ID is required");
         }
 
         return appointmentRepository
@@ -156,15 +161,20 @@ public class BookingService {
                 .toList();
     }
 
+    /**
+     * Updates appointment status.
+     */
     @Transactional
     public AppointmentResponseDTO updateStatus(Long id, String status) {
 
         if (id == null || id <= 0) {
-            throw new IllegalArgumentException("A valid appointment ID is required");
+            throw new IllegalArgumentException(
+                    "A valid appointment ID is required");
         }
 
         if (status == null || status.isBlank()) {
-            throw new IllegalArgumentException("Appointment status is required");
+            throw new IllegalArgumentException(
+                    "Appointment status is required");
         }
 
         Appointment appointment = appointmentRepository.findByIdForUpdate(id)
@@ -188,7 +198,8 @@ public class BookingService {
         }
 
         if (appointment.getStatus() != Appointment.AppointmentStatus.BOOKED
-                && appointment.getStatus() != Appointment.AppointmentStatus.RESCHEDULED) {
+                && appointment.getStatus()
+                        != Appointment.AppointmentStatus.RESCHEDULED) {
             throw new IllegalStateException(
                     "Cannot update appointment with status: "
                             + appointment.getStatus());
@@ -198,10 +209,14 @@ public class BookingService {
 
         Appointment saved = appointmentRepository.save(appointment);
 
+        // Publish completion event only after the transaction commits.
         if (newStatus == Appointment.AppointmentStatus.COMPLETED) {
-            eventPublisher.publishCompleted(
-                    saved.getId(),
-                    saved.getDoctorId());
+            TransactionAfterCommit.execute(() ->
+                    eventPublisher.publishCompleted(
+                            saved.getId(),
+                            saved.getDoctorId()
+                    )
+            );
         }
 
         return toDto(saved);
@@ -210,14 +225,14 @@ public class BookingService {
     private AppointmentResponseDTO toDto(Appointment appointment) {
 
         return new AppointmentResponseDTO(
-            appointment.getId(),
-            appointment.getPatientId(),
-            appointment.getDoctorId(),
-            appointment.getTimeSlotId(),
-            appointment.getStartTime(),
-            appointment.getEndTime(),
-            appointment.getStatus().name(),
-            appointment.getReason()
+                appointment.getId(),
+                appointment.getPatientId(),
+                appointment.getDoctorId(),
+                appointment.getTimeSlotId(),
+                appointment.getStartTime(),
+                appointment.getEndTime(),
+                appointment.getStatus().name(),
+                appointment.getReason()
         );
     }
 }

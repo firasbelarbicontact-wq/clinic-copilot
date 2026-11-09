@@ -8,6 +8,7 @@ import com.clinic.appointment_service.entity.TimeSlot;
 import com.clinic.appointment_service.repository.AppointmentRepository;
 import com.clinic.appointment_service.repository.TimeSlotRepository;
 import com.clinic.appointment_service.service.event.AppointmentEventPublisher;
+import com.clinic.appointment_service.service.event.TransactionAfterCommit;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,7 +56,8 @@ public class RescheduleService {
 
         // 3. Verify appointment status.
         if (appointment.getStatus() != Appointment.AppointmentStatus.BOOKED
-                && appointment.getStatus() != Appointment.AppointmentStatus.RESCHEDULED) {
+                && appointment.getStatus()
+                        != Appointment.AppointmentStatus.RESCHEDULED) {
             throw new IllegalStateException(
                     "Cannot reschedule an appointment with status: "
                             + appointment.getStatus());
@@ -161,11 +163,13 @@ public class RescheduleService {
 
         Appointment saved = appointmentRepository.save(appointment);
 
-        // 14. Publish rescheduling event.
-        eventPublisher.publishRescheduled(
-                saved.getId(),
-                oldStart.toString(),
-                saved.getStartTime().toString()
+        // 14. Publish rescheduling event only after transaction commit.
+        TransactionAfterCommit.execute(() ->
+                eventPublisher.publishRescheduled(
+                        saved.getId(),
+                        oldStart.toString(),
+                        saved.getStartTime().toString()
+                )
         );
 
         return toDto(saved);
