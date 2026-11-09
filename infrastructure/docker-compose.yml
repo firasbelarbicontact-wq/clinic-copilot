@@ -122,7 +122,11 @@ services:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_URL: jdbc:postgresql://postgres:5432/clinic_doctors
+      JWT_SECRET: ${JWT_SECRET}
+      DIPLOMAS_DIR: /app/data/diplomas
       JAVA_TOOL_OPTIONS: -Xmx256m
+    volumes:
+      - diplomas_data:/app/data/diplomas
 
   appointment-service:
     <<: *spring-common
@@ -209,3 +213,4 @@ services:
 volumes:
   pgdata:
   chat_mongo_data:
+  diplomas_data:
