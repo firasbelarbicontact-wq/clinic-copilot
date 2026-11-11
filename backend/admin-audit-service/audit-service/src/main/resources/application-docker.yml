@@ -1,0 +1,6 @@
+# Activated with SPRING_PROFILES_ACTIVE=docker in docker-compose.yml.
+# Overrides only what changes inside the Docker network (service name
+# instead of localhost).
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/audit_service_db
