@@ -9,8 +9,7 @@ import { Icon } from '../../shared/ui/icon';
 import { Panel } from '../../shared/ui/panel';
 import { StatCard } from '../../shared/ui/stat-card';
 import { AdminDoctorSummary, AdminService } from './admin.service';
-import {DecimalPipe} from '@angular/common';
-import { AdminDemoStore } from './admin-demo.store';  
+import { DecimalPipe } from '@angular/common';  
 
 @Component({
   selector: 'app-admin-home-page',
@@ -46,7 +45,7 @@ import { AdminDemoStore } from './admin-demo.store';
           <app-stat-card [icon]="Clock" label="En attente de vérification" [value]="loading() ? '…' : counts().pending" hint="médecins" to="/admin/medecins" tone="warning" />
           <app-stat-card [icon]="Verified" label="Médecins vérifiés" [value]="loading() ? '…' : counts().verified" hint="visibles" to="/admin/medecins" tone="success" />
           <app-stat-card [icon]="Rejected" label="Profils refusés" [value]="loading() ? '…' : counts().rejected" hint="médecins" to="/admin/medecins" tone="primary" />
-          <app-stat-card [icon]="Flag" label="Avis à modérer" [value]="demo.flaggedCount()" hint="signalés" to="/admin/avis" tone="info" />
+          <app-stat-card [icon]="Flag" label="Avis modérés" [value]="loading() ? '…' : reviewsCount()" hint="avis total" to="/admin/avis" tone="info" />
         </div>
 
         <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
@@ -122,7 +121,9 @@ export class AdminHomePage {
   protected readonly loading = signal(true);
   protected readonly failed = signal(false);
   protected readonly counts = signal({ pending: 0, verified: 0, rejected: 0 });
+  protected readonly reviewsCount = signal(0);
   protected readonly queue = signal<AdminDoctorSummary[]>([]);
+  protected readonly Flag = LucideFlag;
 
   protected readonly today = (() => {
     const s = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -160,9 +161,11 @@ export class AdminHomePage {
       p: this.api.list('PENDING'),
       v: this.api.list('VERIFIED'),
       r: this.api.list('REJECTED'),
+      rev: this.api.listReviews(undefined, 0, 1),
     }).subscribe({
-      next: ({ p, v, r }) => {
+      next: ({ p, v, r, rev }) => {
         this.counts.set({ pending: p.totalElements, verified: v.totalElements, rejected: r.totalElements });
+        this.reviewsCount.set(rev.totalElements || 0);
         this.queue.set([...p.content].sort((a, b) => a.createdAt.localeCompare(b.createdAt)).slice(0, 5));
         this.loading.set(false);
       },
@@ -172,8 +175,6 @@ export class AdminHomePage {
       },
     });
   }
-   protected readonly demo = inject(AdminDemoStore);
-   protected readonly Flag = LucideFlag;
 
   private days(iso: string): number {
     return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);

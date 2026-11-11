@@ -6,6 +6,32 @@ import { API_BASE_URL } from '../../core/api.config';
 export type Verification = 'PENDING' | 'VERIFIED' | 'REJECTED';
 export type Professional = 'ACTIVE' | 'ON_LEAVE' | 'INACTIVE' | 'SUSPENDED';
 export type AuditKind = 'AUTH' | 'DOCTOR' | 'REVIEW' | 'USER';
+export type UserRole = 'ADMIN' | 'DOCTOR' | 'PATIENT';
+export type ReviewModerationStatus = 'PUBLISHED' | 'HIDDEN';
+
+export interface AdminUser {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  dateOfBirth?: string;
+  createdAt: string;
+  role: UserRole;
+  isActive: boolean;
+}
+
+export interface AdminReview {
+  id: string;
+  doctorId: string;
+  patientId: string;
+  rating: number;
+  comment: string;
+  authorName: string;
+  status: ReviewModerationStatus;
+  moderationReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface AuditEntry {
   id: string;
@@ -82,5 +108,39 @@ export class AdminService {
 
   audit(): Observable<AuditEntry[]> {
     return this.http.get<AuditEntry[]>(`${this.base}/audit`);
+  }
+
+  // --- Gestion des utilisateurs (identity-profile-service) ---
+  listUsers(): Observable<AdminUser[]> {
+    return this.http.get<AdminUser[]>(`${API_BASE_URL}/api/users`);
+  }
+
+  activateUser(userId: string): Observable<void> {
+    return this.http.patch<void>(`${API_BASE_URL}/api/users/${userId}/activate`, {});
+  }
+
+  deactivateUser(userId: string): Observable<void> {
+    return this.http.patch<void>(`${API_BASE_URL}/api/users/${userId}/deactivate`, {});
+  }
+
+  deleteUser(userId: string): Observable<void> {
+    return this.http.delete<void>(`${API_BASE_URL}/api/users/${userId}`);
+  }
+
+  // --- Modération des avis (reviews-feedback-service) ---
+  listReviews(status?: ReviewModerationStatus, page = 0, size = 50): Observable<Page<AdminReview>> {
+    let params = new HttpParams().set('page', page).set('size', size);
+    if (status) {
+      params = params.set('status', status);
+    }
+    return this.http.get<Page<AdminReview>>(`${this.base}/reviews`, { params });
+  }
+
+  hideReview(reviewId: string, reason: string): Observable<AdminReview> {
+    return this.http.patch<AdminReview>(`${this.base}/reviews/${reviewId}/hide`, { reason });
+  }
+
+  publishReview(reviewId: string): Observable<AdminReview> {
+    return this.http.patch<AdminReview>(`${this.base}/reviews/${reviewId}/publish`, {});
   }
 }

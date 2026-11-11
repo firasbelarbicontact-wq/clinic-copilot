@@ -28,6 +28,13 @@ const KINDS: Record<AuditEntry['kind'], { label: string; dot: string; chip: stri
           </div>
         </app-page-header>
 
+        @if (error()) {
+          <div role="alert" class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-destructive/30 bg-card p-5 shadow-soft">
+            <p class="text-sm text-deep">{{ error() }}</p>
+            <button type="button" class="btn btn-soft" (click)="load()">Réessayer</button>
+          </div>
+        }
+
         <div class="flex flex-wrap items-center gap-3">
           <div class="flex flex-wrap gap-2" role="tablist">
             @for (t of tabs; track t.id) {
@@ -74,10 +81,27 @@ const KINDS: Record<AuditEntry['kind'], { label: string; dot: string; chip: stri
 })
 export class AdminAuditPage implements OnInit {
   private readonly adminService = inject(AdminService);
-  private readonly auditData = signal<AuditEntry[]>([]);
+  protected readonly auditData = signal<AuditEntry[]>([]);
+  protected readonly loading = signal(true);
+  protected readonly error = signal<string | null>(null);
 
   ngOnInit() {
-    this.adminService.audit().subscribe((data) => this.auditData.set(data));
+    this.load();
+  }
+
+  protected load() {
+    this.loading.set(true);
+    this.error.set(null);
+    this.adminService.audit().subscribe({
+      next: (data) => {
+        this.auditData.set(data);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Impossible de charger le journal d\'audit. Vérifiez que admin-audit-service est démarré.');
+        this.loading.set(false);
+      },
+    });
   }
 
   protected readonly Download = LucideDownload;
