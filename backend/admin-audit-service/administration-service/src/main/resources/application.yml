@@ -1,0 +1,39 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: administration-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5437/administration_db}
+    username: ${DB_USER:admin_user}
+    password: ${DB_PASSWORD:admin_pass}   # À CHANGER EN PRODUCTION
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update}        # dev : update. Production : migrer vers Flyway/Liquibase + "validate".
+    open-in-view: false
+
+app:
+  security:
+    # À CHANGER EN PRODUCTION : valeurs de développement uniquement (secret HS256 >= 32 octets).
+    jwt-secret: ${JWT_SECRET:CHANGE_ME_DEV_ONLY_jwt_secret_must_be_at_least_32_bytes_long}
+    # À CHANGER EN PRODUCTION : valeur de développement uniquement.
+    internal-api-key: ${INTERNAL_API_KEY:CHANGE_ME_DEV_ONLY_internal_api_key}
+  clients:
+    timeout-ms: ${CLIENT_TIMEOUT_MS:5000}
+    identity:
+      base-url: ${IDENTITY_SERVICE_URL:http://localhost:8081}          # TODO: confirmer le port avec M1
+    doctor-directory:
+      base-url: ${DOCTOR_DIRECTORY_SERVICE_URL:http://localhost:8083}  # TODO: confirmer le service/port avec M2
+    audit:
+      base-url: ${AUDIT_SERVICE_URL:http://localhost:8086}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

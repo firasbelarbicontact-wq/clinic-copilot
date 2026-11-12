@@ -2,11 +2,12 @@ package com.clinic.patient_profile.controller;
 
 import com.clinic.patient_profile.dto.PatientProfileRequest;
 import com.clinic.patient_profile.dto.PatientProfileResponse;
-import com.clinic.patient_profile.entity.PatientProfile;
 import com.clinic.patient_profile.service.PatientProfileService;
-
-import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -21,37 +22,36 @@ public class PatientProfileController {
         this.patientProfileService = patientProfileService;
     }
 
-    @PostMapping
-    public ResponseEntity<PatientProfileResponse> createProfile(
-        @RequestParam UUID userId,
-        @RequestBody PatientProfileRequest request) {
+     // ---- the logged-in patient (role PATIENT) ----
 
-    PatientProfileResponse createdProfile =
-            patientProfileService.createProfile(userId, request);
+    @GetMapping("/me")
+    public ResponseEntity<PatientProfileResponse> getMyProfile(
+        @AuthenticationPrincipal Jwt jwt
+    ) {
+        return ResponseEntity.ok(
+            patientProfileService.getProfileByUserId(userIdOf(jwt))
+        );
+    }
 
-    return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(createdProfile);
-}
+    @PutMapping("/me")
+    public ResponseEntity<PatientProfileResponse> saveMyProfile(
+        @AuthenticationPrincipal Jwt jwt,
+        @Valid @RequestBody PatientProfileRequest request
+    ) {
+        return ResponseEntity.ok(
+            patientProfileService.upsertProfile(userIdOf(jwt), request)
+        );
+    }
+
+    // ---- administration (role ADMIN) ----
+
 
     @GetMapping("/{userId}")
     public ResponseEntity<PatientProfileResponse> getProfileByUserId(
             @PathVariable UUID userId) {
 
-        PatientProfileResponse profile = patientProfileService.getProfileByUserId(userId);
+        return ResponseEntity.ok(patientProfileService.getProfileByUserId(userId));
 
-        return ResponseEntity.ok(profile);
-    }
-
-    @PutMapping("/{userId}")
-    public ResponseEntity<PatientProfileResponse> updateProfile(
-        @PathVariable UUID userId,
-        @RequestBody PatientProfileRequest request) {
-
-    PatientProfileResponse response =
-            patientProfileService.updateProfile(userId, request);
-
-    return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{userId}")
@@ -59,7 +59,15 @@ public class PatientProfileController {
             @PathVariable UUID userId) {
 
         patientProfileService.deleteProfile(userId);
-
         return ResponseEntity.noContent().build();
+    }
+
+
+    private UUID userIdOf(Jwt jwt) {
+        try {
+            return UUID.fromString(jwt.getSubject());
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new AccessDeniedException("Invalid token subject");
+        }
     }
 }

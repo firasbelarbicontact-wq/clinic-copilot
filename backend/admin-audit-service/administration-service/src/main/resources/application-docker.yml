@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://administration-db:5432/administration_db}
+
+app:
+  clients:
+    identity:
+      base-url: ${IDENTITY_SERVICE_URL:http://identity-service:8081}              # TODO: confirmer avec M1
+    doctor-directory:
+      base-url: ${DOCTOR_DIRECTORY_SERVICE_URL:http://directory-service:8083}     # TODO: confirmer avec M2
+    audit:
+      base-url: ${AUDIT_SERVICE_URL:http://audit-service:8086}

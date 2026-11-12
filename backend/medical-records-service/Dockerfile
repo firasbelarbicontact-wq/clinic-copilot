@@ -1,13 +1,16 @@
-FROM maven:3.9-eclipse-temurin-21 AS build
-WORKDIR /app
+# ---- Build ----
+FROM maven:3.9-eclipse-temurin-25 AS build
+WORKDIR /build
 COPY pom.xml .
-RUN mvn -B dependency:go-offline
+RUN mvn -q -B dependency:go-offline
 COPY src ./src
-RUN mvn -B clean package -DskipTests
+RUN mvn -q -B clean package -DskipTests
 
-FROM eclipse-temurin:21-jre
+# ---- Runtime ----
+FROM eclipse-temurin:25-jre-alpine
+RUN addgroup -S app && adduser -S app -G app
 WORKDIR /app
-RUN useradd -r -u 1001 appuser
-COPY --from=build /app/target/*.jar app.jar
-USER appuser
-ENTRYPOINT ["java", "-jar", "app.jar"]
+COPY --from=build /build/target/medical-records-service-*.jar app.jar
+USER app
+EXPOSE 8086
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

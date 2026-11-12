@@ -1,0 +1,36 @@
+services:
+  records-db:
+    image: postgres:16-alpine
+    container_name: records-db
+    environment:
+      POSTGRES_DB: clinic_records
+      POSTGRES_USER: records_user
+      POSTGRES_PASSWORD: records_pass      # À CHANGER EN PRODUCTION
+    ports:
+      - "5438:5432"
+    volumes:
+      - records-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U records_user -d clinic_records"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  medical-records-service:
+    build: .
+    container_name: medical-records-service
+    depends_on:
+      records-db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://records-db:5432/clinic_records
+      DB_USER: records_user
+      DB_PASSWORD: records_pass
+      JWT_SECRET: ${JWT_SECRET:-CHANGE_ME_DEV_ONLY_jwt_secret_must_be_at_least_32_bytes_long}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-CHANGE_ME_DEV_ONLY_internal_api_key}
+      AUDIT_SERVICE_URL: ${AUDIT_SERVICE_URL:-http://host.docker.internal:8086}
+    ports:
+      - "8091:8086"
+
+volumes:
+  records-db-data:
