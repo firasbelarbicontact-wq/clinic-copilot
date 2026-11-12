@@ -1,4 +1,7 @@
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main
 package com.clinic.appointment_service.service.appointment;
 
 import com.clinic.appointment_service.dto.appointment.AppointmentResponseDTO;
@@ -7,8 +10,11 @@ import com.clinic.appointment_service.entity.TimeSlot;
 import com.clinic.appointment_service.repository.AppointmentRepository;
 import com.clinic.appointment_service.repository.TimeSlotRepository;
 import com.clinic.appointment_service.service.event.AppointmentEventPublisher;
+<<<<<<< HEAD
+=======
 import com.clinic.appointment_service.service.event.TransactionAfterCommit;
 
+>>>>>>> origin/main
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,15 +25,47 @@ public class CancellationService {
     private final TimeSlotRepository timeSlotRepository;
     private final AppointmentEventPublisher eventPublisher;
 
+<<<<<<< HEAD
+    public CancellationService(AppointmentRepository appointmentRepository,
+            TimeSlotRepository timeSlotRepository, AppointmentEventPublisher eventPublisher) {
+=======
     public CancellationService(
             AppointmentRepository appointmentRepository,
             TimeSlotRepository timeSlotRepository,
             AppointmentEventPublisher eventPublisher) {
+>>>>>>> origin/main
         this.appointmentRepository = appointmentRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.eventPublisher = eventPublisher;
     }
 
+<<<<<<< HEAD
+    @Transactional
+    public AppointmentResponseDTO cancel(Long id, String reason) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + id));
+        appointment.setStatus(Appointment.AppointmentStatus.CANCELLED);
+        appointment.setReason(reason);
+        appointmentRepository.save(appointment);
+        if (appointment.getTimeSlotId() != null) {
+            timeSlotRepository.findById(appointment.getTimeSlotId()).ifPresent(slot -> {
+                slot.setStatus(TimeSlot.SlotStatus.FREE);
+                timeSlotRepository.save(slot);
+            });
+        }
+        eventPublisher.publishCancelled(id, reason);
+        return toDto(appointment);
+    }
+
+    private AppointmentResponseDTO toDto(Appointment appointment) {
+        return new AppointmentResponseDTO(
+                appointment.getId(), appointment.getPatientId(), appointment.getDoctorId(),
+                appointment.getTimeSlotId(), appointment.getStartTime(), appointment.getEndTime(),
+                appointment.getStatus().name(), appointment.getReason(),
+                appointment.getCreatedAt(), appointment.getUpdatedAt());
+    }
+}
+=======
     /**
      * Cancels an appointment and releases its time slot.
      */
@@ -125,3 +163,4 @@ public class CancellationService {
         );
     }
 }
+>>>>>>> origin/main

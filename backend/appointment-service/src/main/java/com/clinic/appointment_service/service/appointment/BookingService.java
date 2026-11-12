@@ -1,4 +1,7 @@
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main
 package com.clinic.appointment_service.service.appointment;
 
 import com.clinic.appointment_service.dto.appointment.AppointmentResponseDTO;
@@ -8,8 +11,11 @@ import com.clinic.appointment_service.entity.TimeSlot;
 import com.clinic.appointment_service.repository.AppointmentRepository;
 import com.clinic.appointment_service.repository.TimeSlotRepository;
 import com.clinic.appointment_service.service.event.AppointmentEventPublisher;
+<<<<<<< HEAD
+=======
 import com.clinic.appointment_service.service.event.TransactionAfterCommit;
 
+>>>>>>> origin/main
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,15 +29,50 @@ public class BookingService {
     private final TimeSlotRepository timeSlotRepository;
     private final AppointmentEventPublisher eventPublisher;
 
+<<<<<<< HEAD
+    public BookingService(AppointmentRepository appointmentRepository,
+            TimeSlotRepository timeSlotRepository, AppointmentEventPublisher eventPublisher) {
+=======
     public BookingService(
             AppointmentRepository appointmentRepository,
             TimeSlotRepository timeSlotRepository,
             AppointmentEventPublisher eventPublisher) {
+>>>>>>> origin/main
         this.appointmentRepository = appointmentRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.eventPublisher = eventPublisher;
     }
 
+<<<<<<< HEAD
+    @Transactional
+    public AppointmentResponseDTO book(BookAppointmentDTO dto) {
+        if (dto == null || dto.getPatientId() == null || dto.getDoctorId() == null
+                || dto.getTimeSlotId() == null) {
+            throw new IllegalArgumentException("patientId, doctorId and timeSlotId are required");
+        }
+        TimeSlot slot = timeSlotRepository.findByIdForUpdate(dto.getTimeSlotId())
+                .orElseThrow(() -> new IllegalArgumentException("Time slot not found: " + dto.getTimeSlotId()));
+        if (slot.getStatus() != TimeSlot.SlotStatus.FREE
+                || appointmentRepository.existsByTimeSlotId(slot.getId())) {
+            throw new IllegalStateException("Time slot is not available: " + slot.getId());
+        }
+        slot.setStatus(TimeSlot.SlotStatus.BOOKED);
+        timeSlotRepository.save(slot);
+        Appointment appointment = new Appointment();
+        appointment.setPatientId(dto.getPatientId());
+        appointment.setDoctorId(dto.getDoctorId());
+        appointment.setTimeSlotId(slot.getId());
+        appointment.setStartTime(slot.getStartTime());
+        appointment.setEndTime(slot.getEndTime());
+        appointment.setStatus(Appointment.AppointmentStatus.BOOKED);
+        appointment.setReason(dto.getReason());
+        Appointment saved = appointmentRepository.save(appointment);
+        eventPublisher.publishBooked(
+                saved.getId(),
+                saved.getPatientId(),
+                saved.getDoctorId(),
+                saved.getStartTime().toString());
+=======
     /**
      * Books an available time slot for a patient.
      */
@@ -105,11 +146,16 @@ public class BookingService {
                 )
         );
 
+>>>>>>> origin/main
         return toDto(saved);
     }
 
     @Transactional(readOnly = true)
     public AppointmentResponseDTO getById(Long id) {
+<<<<<<< HEAD
+        return toDto(appointmentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + id)));
+=======
 
         if (id == null || id <= 0) {
             throw new IllegalArgumentException(
@@ -121,10 +167,40 @@ public class BookingService {
                         "Appointment not found: " + id));
 
         return toDto(appointment);
+>>>>>>> origin/main
     }
 
     @Transactional(readOnly = true)
     public List<AppointmentResponseDTO> getByPatient(Long patientId) {
+<<<<<<< HEAD
+        return appointmentRepository.findByPatientIdOrderByStartTimeDesc(patientId)
+                .stream().map(this::toDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AppointmentResponseDTO> getByDoctor(Long doctorId,
+            LocalDateTime from,
+            LocalDateTime to) {
+        return appointmentRepository.findByDoctorIdAndStartTimeBetween(doctorId, from, to)
+                .stream().map(this::toDto).toList();
+    }
+
+    @Transactional
+    public AppointmentResponseDTO updateStatus(Long id, String status) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + id));
+        Appointment.AppointmentStatus newStatus;
+        try {
+            newStatus = Appointment.AppointmentStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Unsupported appointment status: " + status, exception);
+        }
+        appointment.setStatus(newStatus);
+        Appointment saved = appointmentRepository.save(appointment);
+        if (newStatus == Appointment.AppointmentStatus.COMPLETED) {
+            eventPublisher.publishCompleted(saved.getId(), saved.getDoctorId());
+        }
+=======
 
         if (patientId == null || patientId <= 0) {
             throw new IllegalArgumentException(
@@ -219,10 +295,20 @@ public class BookingService {
             );
         }
 
+>>>>>>> origin/main
         return toDto(saved);
     }
 
     private AppointmentResponseDTO toDto(Appointment appointment) {
+<<<<<<< HEAD
+        return new AppointmentResponseDTO(
+                appointment.getId(), appointment.getPatientId(), appointment.getDoctorId(),
+                appointment.getTimeSlotId(), appointment.getStartTime(), appointment.getEndTime(),
+                appointment.getStatus().name(), appointment.getReason(),
+                appointment.getCreatedAt(), appointment.getUpdatedAt());
+    }
+}
+=======
 
         return new AppointmentResponseDTO(
                 appointment.getId(),
@@ -236,3 +322,4 @@ public class BookingService {
         );
     }
 }
+>>>>>>> origin/main

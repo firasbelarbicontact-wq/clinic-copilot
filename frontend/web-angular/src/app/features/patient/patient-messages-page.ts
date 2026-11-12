@@ -127,7 +127,11 @@ export class PatientMessagesPage {
 
   protected readonly conversations = computed(() =>
     Object.entries(this.threads())
+<<<<<<< HEAD
+      .map(([id, msgs]) => ({ doctor: DOCTORS.find((d) => d.id === id)!, last: msgs[msgs.length - 1] }))
+=======
       .map(([id, msgs]) => ({ doctor: DOCTORS.find((d) => d.id === id)!, last: (msgs[msgs.length - 1] as Msg | undefined) }))
+>>>>>>> origin/main
       .filter((c) => !!c.doctor),
   );
   protected readonly active = computed(() => DOCTORS.find((d) => d.id === this.activeId()) ?? null);

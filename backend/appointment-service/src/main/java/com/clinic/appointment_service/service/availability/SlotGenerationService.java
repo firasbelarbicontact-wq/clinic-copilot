@@ -1,6 +1,10 @@
 package com.clinic.appointment_service.service.availability;
 
 import com.clinic.appointment_service.dto.availability.TimeSlotDTO;
+<<<<<<< HEAD
+import com.clinic.appointment_service.entity.TimeSlot;
+import com.clinic.appointment_service.repository.TimeSlotRepository;
+=======
 import com.clinic.appointment_service.entity.AvailabilityException;
 import com.clinic.appointment_service.entity.DoctorSchedule;
 import com.clinic.appointment_service.entity.TimeSlot;
@@ -8,20 +12,48 @@ import com.clinic.appointment_service.repository.AvailabilityExceptionRepository
 import com.clinic.appointment_service.repository.DoctorScheduleRepository;
 import com.clinic.appointment_service.repository.TimeSlotRepository;
 
+>>>>>>> origin/main
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+<<<<<<< HEAD
+import java.util.List;
+=======
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+>>>>>>> origin/main
 
 @Service
 public class SlotGenerationService {
 
     private final TimeSlotRepository timeSlotRepository;
+<<<<<<< HEAD
+
+    public SlotGenerationService(TimeSlotRepository timeSlotRepository) {
+        this.timeSlotRepository = timeSlotRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<TimeSlotDTO> getSlots(Long doctorId, LocalDate date, String status) {
+        if (doctorId == null || date == null) {
+            throw new IllegalArgumentException("doctorId and date are required");
+        }
+        LocalDateTime from = date.atStartOfDay();
+        LocalDateTime to = date.plusDays(1).atStartOfDay().minusNanos(1);
+        return timeSlotRepository.findByDoctorIdAndStartTimeBetween(doctorId, from, to).stream()
+                .filter(slot -> status == null || slot.getStatus().name().equalsIgnoreCase(status))
+                .map(this::toDto).toList();
+    }
+
+    @Transactional
+    public void generateSlotsForDoctor(Long doctorId, LocalDate date) {
+        if (doctorId == null || date == null) {
+            throw new IllegalArgumentException("doctorId and date are required");
+=======
     private final DoctorScheduleRepository doctorScheduleRepository;
     private final AvailabilityExceptionRepository availabilityExceptionRepository;
 
@@ -251,10 +283,15 @@ public class SlotGenerationService {
         if (doctorId == null || doctorId <= 0 || date == null) {
             throw new IllegalArgumentException(
                     "A valid doctorId and date are required");
+>>>>>>> origin/main
         }
     }
 
     private TimeSlotDTO toDto(TimeSlot slot) {
+<<<<<<< HEAD
+        return new TimeSlotDTO(slot.getId(), slot.getDoctorId(), slot.getStartTime(),
+                slot.getEndTime(), slot.getStatus().name());
+=======
 
         return new TimeSlotDTO(
                 slot.getId(),
@@ -262,5 +299,6 @@ public class SlotGenerationService {
                 slot.getStartTime(),
                 slot.getEndTime(),
                 slot.getStatus().name());
+>>>>>>> origin/main
     }
 }

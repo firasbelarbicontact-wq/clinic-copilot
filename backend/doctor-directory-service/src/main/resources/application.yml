@@ -31,7 +31,12 @@ management:
 app:
   security:
     jwt:
+<<<<<<< HEAD
+      
+      secret: ${JWT_SECRET:ZGV2LW9ubHktc2VjcmV0LWNoYW5nZS1tZS0wMTIzNDU2Nzg5}
+=======
       secret: ${JWT_SECRET}
+>>>>>>> origin/main
       roles-claim: ${JWT_ROLES_CLAIM:role}
   storage:
     diplomas-dir: ${DIPLOMAS_DIR:./data/diplomas}

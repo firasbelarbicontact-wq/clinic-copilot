@@ -20,7 +20,10 @@
     <properties>
         <java.version>17</java.version>
         <spring-cloud.version>2023.0.1</spring-cloud.version>
+<<<<<<< HEAD
+=======
         <lombok.version>1.18.42</lombok.version>
+>>>>>>> origin/main
     </properties>
 
     <dependencies>
@@ -97,7 +100,10 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+<<<<<<< HEAD
+=======
             <version>${lombok.version}</version>
+>>>>>>> origin/main
             <optional>true</optional>
         </dependency>
         <!-- Test -->
@@ -138,6 +144,8 @@
     <build>
         <plugins>
             <plugin>
+<<<<<<< HEAD
+=======
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
@@ -152,6 +160,7 @@
                 </configuration>
             </plugin>
             <plugin>
+>>>>>>> origin/main
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
@@ -165,4 +174,8 @@
             </plugin>
         </plugins>
     </build>
+<<<<<<< HEAD
 </project>
+=======
+</project>
+>>>>>>> origin/main

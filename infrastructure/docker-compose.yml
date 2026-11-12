@@ -83,6 +83,7 @@ services:
       REVIEWS_URL: http://reviews-feedback-service:8088
       DOCTOR_URL: http://doctor-directory-service:8082
       APPOINTMENT_URL: http://appointment-service:8084
+      CHAT_URL: http://chat-service:3000
     ports:
       - "8080:8080"
 
@@ -130,6 +131,7 @@ services:
       SERVER_PORT: 8090
       JWT_SECRET: ${JWT_SECRET}
       JAVA_TOOL_OPTIONS: -Xmx256m
+      JWT_SECRET_BASE64: "true"
 
   doctor-directory-service:
     <<: *spring-common
@@ -215,6 +217,7 @@ services:
     ports:
       - "8089:8089"
 
+
   # -------------------------
   # EXPRESS CHAT SERVICE
   # -------------------------
@@ -227,6 +230,7 @@ services:
       NODE_ENV: production
       PORT: 3000
       MONGODB_URI: mongodb://chat-mongodb:27017/clinic_chat
+
     depends_on:
       chat-mongodb:
         condition: service_healthy

@@ -2,7 +2,10 @@ package com.clinic.appointment_service.repository;
 
 import com.clinic.appointment_service.entity.TimeSlot;
 import jakarta.persistence.LockModeType;
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -14,10 +17,23 @@ import java.util.Optional;
 
 public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
 
+<<<<<<< HEAD
+    /**
+     * Verrouillage pessimiste pour eviter les doubles reservations.
+     */
+=======
+>>>>>>> origin/main
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT t FROM TimeSlot t WHERE t.id = :id")
     Optional<TimeSlot> findByIdForUpdate(@Param("id") Long id);
 
+<<<<<<< HEAD
+    List<TimeSlot> findByDoctorIdAndStartTimeBetween(Long doctorId,
+            LocalDateTime start,
+            LocalDateTime end);
+
+    List<TimeSlot> findByDoctorIdAndStatus(Long doctorId, TimeSlot.SlotStatus status);
+=======
     List<TimeSlot> findByDoctorIdAndStartTimeBetweenOrderByStartTimeAsc(
             Long doctorId,
             LocalDateTime start,
@@ -49,4 +65,5 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
             LocalDateTime startTime);
 
     List<TimeSlot> findByScheduleId(Long scheduleId);
+>>>>>>> origin/main
 }

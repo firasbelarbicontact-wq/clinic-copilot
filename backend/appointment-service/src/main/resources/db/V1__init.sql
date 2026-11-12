@@ -39,7 +39,11 @@ CREATE TABLE time_slot (
 );
 CREATE INDEX idx_time_slot_doctor ON time_slot(doctor_id);
 CREATE INDEX idx_time_slot_status ON time_slot(status);
+<<<<<<< HEAD
+CREATE INDEX idx_time_slot_start  ON time_slot(start_time);
+=======
 CREATE INDEX idx_time_slot_start ON time_slot(start_time);
+>>>>>>> origin/main
 
 -- Rendez-vous
 CREATE TABLE appointment (
@@ -56,6 +60,12 @@ CREATE TABLE appointment (
     CONSTRAINT uk_appointment_slot UNIQUE (time_slot_id)
 );
 CREATE INDEX idx_appointment_patient ON appointment(patient_id);
+<<<<<<< HEAD
+CREATE INDEX idx_appointment_doctor  ON appointment(doctor_id);
+CREATE INDEX idx_appointment_status  ON appointment(status);
+CREATE INDEX idx_appointment_start   ON appointment(start_time);
+=======
 CREATE INDEX idx_appointment_doctor ON appointment(doctor_id);
 CREATE INDEX idx_appointment_status ON appointment(status);
 CREATE INDEX idx_appointment_start ON appointment(start_time);
+>>>>>>> origin/main

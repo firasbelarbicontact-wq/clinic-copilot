@@ -36,6 +36,19 @@ spring:
               predicates:
                 - Path=/api/users/**
 
+            # Chat (Express + MongoDB)
+            - id: chat-service
+              uri: ${CHAT_SERVICE_URL:${CHAT_URL:http://localhost:3000}}
+              predicates:
+                - Path=/api/chat/**
+              filters:
+                - StripPrefix=2
+
+            - id: chat-socketio
+              uri: ${CHAT_SERVICE_URL:${CHAT_URL:http://localhost:3000}}
+              predicates:
+                - Path=/socket.io/**
+
             # Patients
             - id: patient-profiles
               uri: ${PATIENT_PROFILE_URL:${PATIENT_URL:http://localhost:8090}}
