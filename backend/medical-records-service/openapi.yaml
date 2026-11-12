@@ -1,0 +1,55 @@
+openapi: 3.0.3
+info:
+  title: Clinic Copilot - Medical Records Service
+  version: 0.0.1
+  description: Consultations, notes cliniques, plans de médication et suivi de prise. PROPOSITION à valider avec M4.
+servers:
+  - url: http://localhost:8091
+security:
+  - bearerAuth: []
+paths:
+  /api/v1/consultations:
+    post:
+      summary: Créer une consultation (DOCTOR)
+      responses: { '201': { description: Créée }, '400': { description: Invalide }, '403': { description: Refusé } }
+  /api/v1/consultations/{id}:
+    get:
+      summary: Lire une consultation (patient concerné ou médecin auteur)
+      responses: { '200': { description: OK }, '403': { description: Refusé }, '404': { description: Introuvable } }
+  /api/v1/consultations/{id}/notes:
+    post:
+      summary: Ajouter une note clinique (médecin auteur)
+      responses: { '201': { description: Créée }, '403': { description: Refusé } }
+    get:
+      summary: Lire les notes (patient concerné ou médecin auteur)
+      responses: { '200': { description: OK }, '403': { description: Refusé } }
+  /api/v1/patients/{patientId}/consultations:
+    get:
+      summary: Lister les consultations d'un patient (filtré selon l'appelant)
+      responses: { '200': { description: OK }, '403': { description: Refusé } }
+  /api/v1/medication-plans:
+    post:
+      summary: Créer un plan de médication (DOCTOR)
+      responses: { '201': { description: Créé }, '400': { description: Invalide }, '403': { description: Refusé } }
+  /api/v1/medication-plans/{id}:
+    get:
+      summary: Lire un plan (patient concerné ou médecin auteur)
+      responses: { '200': { description: OK }, '403': { description: Refusé }, '404': { description: Introuvable } }
+  /api/v1/medication-plans/{id}/status:
+    patch:
+      summary: Changer le statut d'un plan (médecin auteur) - ACTIVE, COMPLETED, CANCELLED
+      responses: { '200': { description: OK }, '403': { description: Refusé } }
+  /api/v1/patients/{patientId}/medication-plans:
+    get:
+      summary: Lister les plans d'un patient (filtré selon l'appelant)
+      responses: { '200': { description: OK }, '403': { description: Refusé } }
+  /api/v1/medication-items/{itemId}/adherence:
+    post:
+      summary: Enregistrer une prise (PATIENT concerné) - TAKEN, MISSED, SKIPPED
+      responses: { '201': { description: Enregistrée }, '403': { description: Refusé } }
+    get:
+      summary: Consulter le suivi de prise (patient concerné ou médecin auteur)
+      responses: { '200': { description: OK }, '403': { description: Refusé } }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }

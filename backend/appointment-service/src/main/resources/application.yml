@@ -1,41 +1,69 @@
 server:
+<<<<<<< HEAD
   port: 8084
+=======
+  port: ${SERVER_PORT:8084}
+>>>>>>> origin/main
 
 spring:
   application:
     name: appointment-service
 
   datasource:
+<<<<<<< HEAD
     url: jdbc:postgresql://localhost:5432/clinic_appointment_db
     username: postgres
     password: postgres
+=======
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/clinic_appointments}
+    username: ${DB_USER:clinic}
+    password: ${DB_PASSWORD:secret}
+>>>>>>> origin/main
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
       ddl-auto: validate
+<<<<<<< HEAD
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: true
+=======
+    open-in-view: false
+    show-sql: false
+>>>>>>> origin/main
 
   flyway:
     enabled: true
     locations: classpath:db
 
   rabbitmq:
+<<<<<<< HEAD
     host: localhost
     port: 5672
     username: guest
     password: guest
+=======
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+>>>>>>> origin/main
 
 # --- Feign client URLs ---
 services:
   identity-profile:
+<<<<<<< HEAD
     url: http://localhost:8081
   doctor-directory:
     url: http://localhost:8082
+=======
+    url: ${IDENTITY_PROFILE_URL:http://localhost:8081}
+  doctor-directory:
+    url: ${DOCTOR_DIRECTORY_URL:http://localhost:8082}
+>>>>>>> origin/main
 
 # --- RabbitMQ configuration ---
 app:
@@ -56,8 +84,12 @@ app:
 # --- JWT ---
 security:
   jwt:
+<<<<<<< HEAD
     secret: ${JWT_SECRET:Y2xpbmljLWNvcGlsb3Qtc2VjcmV0LWtleS1mb3ItZGV2ZWxvcG1lbnQtMTIzNDU2Nzg5MA==}
     expiration: 86400000
+=======
+    secret: ${JWT_SECRET}
+>>>>>>> origin/main
 
 # --- OpenAPI ---
 springdoc:
@@ -68,4 +100,8 @@ springdoc:
 
 logging:
   level:
+<<<<<<< HEAD
     com.clinic.appointment_service: DEBUG
+=======
+    com.clinic.appointment_service: INFO
+>>>>>>> origin/main

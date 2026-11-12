@@ -1,25 +1,54 @@
+<<<<<<< HEAD
 package com.clinic.appointment_service.entity;
 
 import jakarta.persistence.*;
+=======
+
+package com.clinic.appointment_service.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+>>>>>>> origin/main
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
 @Table(name = "doctor_schedule")
+<<<<<<< HEAD
+=======
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+>>>>>>> origin/main
 public class DoctorSchedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+<<<<<<< HEAD
     @Column(nullable = false)
     private Long doctorId;
 
+=======
+    @NotNull
+    @Column(nullable = false)
+    private Long doctorId;
+
+    @NotNull
+>>>>>>> origin/main
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private DayOfWeek dayOfWeek;
 
+<<<<<<< HEAD
     @Column(nullable = false)
     private LocalTime startTime;
 
@@ -74,6 +103,32 @@ public class DoctorSchedule {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 
+=======
+    @NotNull
+    @Column(nullable = false)
+    private LocalTime startTime;
+
+    @NotNull
+    @Column(nullable = false)
+    private LocalTime endTime;
+
+    @NotNull
+    @Column(nullable = false)
+    private Integer slotDurationMinutes;
+
+    @NotNull
+    @Column(nullable = false)
+    private Boolean isActive = true;
+
+    @NotNull
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @NotNull
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+>>>>>>> origin/main
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
@@ -85,4 +140,8 @@ public class DoctorSchedule {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/main

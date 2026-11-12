@@ -70,9 +70,22 @@ services:
     image: ${DOCKERHUB_USER:-clinic}/clinic-api-gateway:1.0
     restart: unless-stopped
     environment:
-      JAVA_TOOL_OPTIONS: -Xmx256m
+      IDENTITY_SERVICE_URL: http://identity-profile-service:8081
+      DOCTOR_DIRECTORY_URL: http://doctor-directory-service:8082
+      PATIENT_PROFILE_URL: http://patient-profile-service:8090
+      APPOINTMENT_SERVICE_URL: http://appointment-service:8084
+      REVIEWS_SERVICE_URL: http://reviews-feedback-service:8088
+      ADMIN_AUDIT_URL: http://admin-audit-service:8089
+      MEDICAL_RECORDS_URL: http://medical-records-service:8086
+      JAVA_TOOL_OPTIONS: "-Xmx256m"
+      IDENTITY_URL: http://identity-profile-service:8081
+      PATIENT_URL: http://patient-profile-service:8090
+      REVIEWS_URL: http://reviews-feedback-service:8088
+      DOCTOR_URL: http://doctor-directory-service:8082
+      APPOINTMENT_URL: http://appointment-service:8084
+      CHAT_URL: http://chat-service:3000
     ports:
-      - "8090:8080"
+      - "8080:8080"
 
   # -------------------------
   # ANGULAR FRONTEND
@@ -116,7 +129,9 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_URL: jdbc:postgresql://postgres:5432/clinic_patients
       SERVER_PORT: 8090
+      JWT_SECRET: ${JWT_SECRET}
       JAVA_TOOL_OPTIONS: -Xmx256m
+      JWT_SECRET_BASE64: "true"
 
   doctor-directory-service:
     <<: *spring-common
@@ -126,7 +141,11 @@ services:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_URL: jdbc:postgresql://postgres:5432/clinic_doctors
+      JWT_SECRET: ${JWT_SECRET}
+      DIPLOMAS_DIR: /app/data/diplomas
       JAVA_TOOL_OPTIONS: -Xmx256m
+    volumes:
+      - diplomas_data:/app/data/diplomas
 
   appointment-service:
     <<: *spring-common
@@ -138,6 +157,7 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/clinic_appointments
       IDENTITY_PROFILE_URL: http://identity-profile-service:8081
       DOCTOR_DIRECTORY_URL: http://doctor-directory-service:8082
+      JWT_SECRET: ${JWT_SECRET}
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER:-guest}
@@ -192,7 +212,11 @@ services:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       DB_URL: jdbc:postgresql://postgres:5432/clinic_admin
+      JWT_SECRET: ${JWT_SECRET}
       JAVA_TOOL_OPTIONS: -Xmx256m
+    ports:
+      - "8089:8089"
+
 
   # -------------------------
   # EXPRESS CHAT SERVICE
@@ -206,6 +230,7 @@ services:
       NODE_ENV: production
       PORT: 3000
       MONGODB_URI: mongodb://chat-mongodb:27017/clinic_chat
+
     depends_on:
       chat-mongodb:
         condition: service_healthy
@@ -213,3 +238,4 @@ services:
 volumes:
   pgdata:
   chat_mongo_data:
+  diplomas_data:

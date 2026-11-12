@@ -14,6 +14,12 @@ public class PatientClientConfig {
     @Bean
     public RestClient patientRestClient() {
         return RestClient.builder()
+
+    @Bean
+    public RestClient patientRestClient(
+            RestClient.Builder builder,
+            @Value("${services.patient-url:http://localhost:8090}") String patientServiceUrl) {
+        return builder
                 .baseUrl(patientServiceUrl)
                 .build();
     }

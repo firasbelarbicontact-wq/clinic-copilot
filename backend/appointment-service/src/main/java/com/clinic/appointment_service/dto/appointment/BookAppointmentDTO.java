@@ -1,6 +1,7 @@
 package com.clinic.appointment_service.dto.appointment;
 
 import jakarta.validation.constraints.NotNull;
+<<<<<<< HEAD
 
 public class BookAppointmentDTO {
         @NotNull
@@ -30,3 +31,13 @@ public class BookAppointmentDTO {
         public String getReason() { return reason; }
         public void setReason(String reason) { this.reason = reason; }
 }
+=======
+import jakarta.validation.constraints.Positive;
+
+public record BookAppointmentDTO(
+        @NotNull @Positive Long patientId,
+        @NotNull @Positive Long doctorId,
+        @NotNull @Positive Long timeSlotId,
+        String reason
+) {}
+>>>>>>> origin/main

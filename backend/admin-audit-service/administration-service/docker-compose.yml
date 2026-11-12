@@ -1,0 +1,46 @@
+services:
+  administration-db:
+    image: postgres:16-alpine
+    container_name: administration-db
+    environment:
+      POSTGRES_DB: administration_db
+      POSTGRES_USER: admin_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin_pass}   # À CHANGER EN PRODUCTION
+    ports:
+      - "5437:5432"            # port hôte distinct de celui d'audit-service
+    volumes:
+      - administration-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin_user -d administration_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [clinic-net]
+
+  administration-service:
+    build: .
+    container_name: administration-service
+    depends_on:
+      administration-db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_USER: admin_user
+      DB_PASSWORD: ${DB_PASSWORD:-admin_pass}
+      JWT_SECRET: ${JWT_SECRET:-CHANGE_ME_DEV_ONLY_jwt_secret_must_be_at_least_32_bytes_long}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-CHANGE_ME_DEV_ONLY_internal_api_key}
+      IDENTITY_SERVICE_URL: ${IDENTITY_SERVICE_URL:-http://identity-service:8081}
+      DOCTOR_DIRECTORY_SERVICE_URL: ${DOCTOR_DIRECTORY_SERVICE_URL:-http://directory-service:8083}
+      AUDIT_SERVICE_URL: ${AUDIT_SERVICE_URL:-http://audit-service:8086}
+    ports:
+      - "8087:8087"
+    networks: [clinic-net]
+
+volumes:
+  administration-db-data:
+
+# Réseau partagé : les autres services (audit, identity, ...) doivent déclarer le même "name"
+# pour pouvoir se joindre par leur nom DNS.
+networks:
+  clinic-net:
+    name: clinic-copilot-net

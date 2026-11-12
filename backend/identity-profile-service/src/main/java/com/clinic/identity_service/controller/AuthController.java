@@ -22,12 +22,10 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtService jwtService;
-    private final CustomUserDetailsService customUserDetailsService;
 
-    public AuthController(AuthService authService, JwtService jwtService, CustomUserDetailsService customUserDetailsService) {
+    public AuthController(AuthService authService, JwtService jwtService) {
         this.authService = authService;
         this.jwtService = jwtService;
-        this.customUserDetailsService = customUserDetailsService;
     }
 
     @PostMapping("/login")
@@ -35,9 +33,7 @@ public class AuthController {
 
         User user = authService.loginUser(request);
 
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getEmail());
-
-        String token = jwtService.generateToken(userDetails);
+        String token = jwtService.generateToken(user);
 
         AuthResponse response = new AuthResponse(
             token,
@@ -45,7 +41,11 @@ public class AuthController {
             user.getRole().name()
         );
 
-        return ResponseEntity.ok(response);
+        HttpStatus status = Boolean.TRUE.equals(user.getIsActive())
+            ? HttpStatus.OK
+            : HttpStatus.FORBIDDEN;
+
+        return ResponseEntity.status(status).body(response);
     }
 
     @PostMapping("/register")

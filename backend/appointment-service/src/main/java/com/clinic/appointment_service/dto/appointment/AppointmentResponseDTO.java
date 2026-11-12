@@ -2,6 +2,7 @@ package com.clinic.appointment_service.dto.appointment;
 
 import java.time.LocalDateTime;
 
+<<<<<<< HEAD
 public class AppointmentResponseDTO {
         private Long id;
         private Long patientId;
@@ -53,3 +54,15 @@ public class AppointmentResponseDTO {
         public LocalDateTime getUpdatedAt() { return updatedAt; }
         public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
+=======
+public record AppointmentResponseDTO(
+        Long id,
+        Long patientId,
+        Long doctorId,
+        Long timeSlotId,
+        LocalDateTime startTime,
+        LocalDateTime endTime,
+        String status,
+        String reason
+) {}
+>>>>>>> origin/main

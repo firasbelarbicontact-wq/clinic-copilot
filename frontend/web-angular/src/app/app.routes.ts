@@ -97,11 +97,40 @@ export const routes: Routes = [
     children: [
       {
         path: '',
+<<<<<<< HEAD
         loadComponent: () => import('./features/admin/admin-page').then((m) => m.AdminPage),
         title: 'Vérification des médecins · Clinic Copilot',
       },
     ],
   },
+=======
+        loadComponent: () => import('./features/admin/admin-home-page').then((m) => m.AdminHomePage),
+        title: 'Administration · Clinic Copilot',
+      },
+      {
+        path: 'medecins',
+        loadComponent: () => import('./features/admin/admin-page').then((m) => m.AdminPage),
+        title: 'Vérification des médecins · Clinic Copilot',
+      },
+            {
+        path: 'avis',
+        loadComponent: () => import('./features/admin/admin-reviews-page').then((m) => m.AdminReviewsPage),
+        title: 'Modération des avis · Clinic Copilot',
+      },
+      {
+        path: 'utilisateurs',
+        loadComponent: () => import('./features/admin/admin-users-page').then((m) => m.AdminUsersPage),
+        title: 'Utilisateurs · Clinic Copilot',
+      },
+      {
+        path: 'audit',
+        loadComponent: () => import('./features/admin/admin-audit-page').then((m) => m.AdminAuditPage),
+        title: "Journal d'audit · Clinic Copilot",
+      },
+    ],
+  },
+  { path: 'espace-admin', redirectTo: 'admin', pathMatch: 'full' },
+>>>>>>> origin/main
 
   // ───────────── ESPACE MÉDECIN ─────────────
   {

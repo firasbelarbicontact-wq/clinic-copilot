@@ -1,28 +1,64 @@
+<<<<<<< HEAD
 package com.clinic.appointment_service.entity;
 
 import jakarta.persistence.*;
+=======
+
+package com.clinic.appointment_service.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+>>>>>>> origin/main
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "time_slot")
+<<<<<<< HEAD
+=======
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+>>>>>>> origin/main
 public class TimeSlot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+<<<<<<< HEAD
+=======
+    @NotNull
+>>>>>>> origin/main
     @Column(nullable = false)
     private Long doctorId;
 
     @Column(name = "schedule_id")
     private Long scheduleId;
 
+<<<<<<< HEAD
     @Column(nullable = false)
     private LocalDateTime startTime;
 
     @Column(nullable = false)
     private LocalDateTime endTime;
 
+=======
+    @NotNull
+    @Column(nullable = false)
+    private LocalDateTime startTime;
+
+    @NotNull
+    @Column(nullable = false)
+    private LocalDateTime endTime;
+
+    @NotNull
+>>>>>>> origin/main
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 15)
     private SlotStatus status;
@@ -30,6 +66,7 @@ public class TimeSlot {
     @Version
     private Long version;
 
+<<<<<<< HEAD
     public TimeSlot() {
     }
 
@@ -62,3 +99,11 @@ public class TimeSlot {
         FREE, BOOKED, BLOCKED
     }
 }
+=======
+    public enum SlotStatus {
+        FREE,
+        BOOKED,
+        BLOCKED
+    }
+}
+>>>>>>> origin/main

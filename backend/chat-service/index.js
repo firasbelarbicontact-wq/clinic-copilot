@@ -1,37 +1,40 @@
+require('dotenv').config();
 const http = require('http');
 const express = require('express');
 const mongoose = require('mongoose');
-
-const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/clinic_chat';
+const cors = require('cors');
+const chatRoutes = require('./src/routes/chat.routes');
+const { initSocket } = require('./src/socket');
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
-// Vérification de santé : utilisée par toi (curl) et par Docker
-app.get('/health', (req, res) => {
-    const dbReady = mongoose.connection.readyState === 1;
-    res.status(dbReady ? 200 : 503).json({
-        status: dbReady ? 'UP' : 'DOWN',
-        service: 'chat-service',
-        mongodb: dbReady ? 'connected' : 'disconnected',
-    });
+app.get('/health', (req, res) => res.json({ status: 'UP' }));
+app.use('/', chatRoutes);
+
+app.use((err, req, res, next) => {
+    console.error(err);
+    res.status(500).json({ message: 'Erreur serveur' });
 });
 
-// Serveur HTTP créé à part : le WebSocket s'y branchera plus tard
 const server = http.createServer(app);
+app.set('io', initSocket(server));
 
-async function start() {
-    try {
-        await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 10000 });
-        console.log('MongoDB connecté');
-    } catch (err) {
-        console.error('Connexion MongoDB impossible :', err.message);
-        process.exit(1); // Docker relancera le service (restart: unless-stopped)
-    }
-    server.listen(PORT, () => console.log(`chat-service démarré sur le port ${PORT}`));
+const PORT = process.env.PORT || 3000;
+const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+    console.error('MONGODB_URI manquant dans le fichier .env');
+    process.exit(1);
 }
 
-start();
-
-module.exports = { app, server };
+mongoose.connect(MONGO_URI)
+    .then(() => {
+        console.log('MongoDB connecté');
+        server.listen(PORT, () => console.log(`chat-service sur le port ${PORT}`));
+    })
+    .catch((err) => {
+        console.error('Erreur MongoDB :', err.message);
+        process.exit(1);
+    });

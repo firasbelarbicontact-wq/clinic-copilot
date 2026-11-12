@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 package com.clinic.appointment_service.entity;
 
 import jakarta.persistence.*;
@@ -5,12 +6,41 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "appointment")
+=======
+
+package com.clinic.appointment_service.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(
+    name = "appointment",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_appointment_slot",
+            columnNames = "time_slot_id"
+        )
+    }
+)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+>>>>>>> origin/main
 public class Appointment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+<<<<<<< HEAD
     @Column(nullable = false)
     private Long patientId;
 
@@ -26,12 +56,35 @@ public class Appointment {
     @Column(nullable = false)
     private LocalDateTime endTime;
 
+=======
+    @NotNull
+    @Column(nullable = false)
+    private Long patientId;
+
+    @NotNull
+    @Column(nullable = false)
+    private Long doctorId;
+
+    @Column(name = "time_slot_id")
+    private Long timeSlotId;
+
+    @NotNull
+    @Column(nullable = false)
+    private LocalDateTime startTime;
+
+    @NotNull
+    @Column(nullable = false)
+    private LocalDateTime endTime;
+
+    @NotNull
+>>>>>>> origin/main
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private AppointmentStatus status;
 
     private String reason;
 
+<<<<<<< HEAD
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -75,6 +128,16 @@ public class Appointment {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 
+=======
+    @NotNull
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @NotNull
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+>>>>>>> origin/main
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
@@ -88,6 +151,16 @@ public class Appointment {
     }
 
     public enum AppointmentStatus {
+<<<<<<< HEAD
         BOOKED, CANCELLED, RESCHEDULED, COMPLETED, NO_SHOW
     }
 }
+=======
+        BOOKED,
+        CANCELLED,
+        RESCHEDULED,
+        COMPLETED,
+        NO_SHOW
+    }
+}
+>>>>>>> origin/main
