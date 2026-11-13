@@ -1,20 +1,51 @@
 server:
-  port: 8087
+  port: ${SERVER_PORT:8087}
 
 spring:
   application:
     name: notification-service
+
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/clinic_notifications}
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/clinic_notifications}
     username: ${DB_USER:clinic}
-    password: ${DB_PASSWORD:secret}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     open-in-view: false
+    show-sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+# --- RabbitMQ (nafs exchange mta3 appointment-service) ---
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    secret-base64: ${JWT_SECRET_BASE64:false}
+  rabbit:
+    exchange: ${RABBIT_EXCHANGE:appointment.exchange}
+    queue: ${RABBIT_QUEUE:notification.appointments}
+    routing-key: ${RABBIT_ROUTING_KEY:appointment.#}
 
 management:
   endpoints:
     web:
       exposure:
         include: health
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+
+logging:
+  level:
+    com.clinic.notification_service: INFO
